@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+		<link rel="stylesheet"  type="text/css" href="css/animate.css" />
+		
+		<link rel="stylesheet"  type="text/css" href="css/style_index.css" />
+
+		<script>
+
+		$(document).ready(function(){
+
+			$('#logo').click(function(){
+
+				setTimeout(function(){
+					$('.logo_view').addClass('animated fadeOut');
+					setTimeout(function(){
+	                	$('.level_view').show().addClass('animated bounceInUp');
+	            	},500);
+            	},1000);
+			});
+
+		});
+
+		</script>
+
+	</head>
+	<body>
+
+		<!-- 1st ( START ) VIEW -->
+		<div class="logo_view">
+			<div class="logo_container">
+				<img id="logo" src="img/TITLE/TITLE.png">
+				<img id="enter" src="img/TITLE/ENTER.png">
+			</div>
+
+			<img id="note_1" class="note" src="img/NOTE_IMG/01_red_219_153.png">
+			<img id="note_2" class="note" src="img/NOTE_IMG/02_blue_1115_538.png">
+			<img id="note_3" class="note" src="img/NOTE_IMG/03_yellow_634_942.png">
+			<img id="note_4" class="note" src="img/NOTE_IMG/04_red_1196_1407.png">
+			<img id="note_5" class="note" src="img/NOTE_IMG/05_violet_303_1792.png">
+			<img id="note_6" class="note" src="img/NOTE_IMG/06_green_850_2157.png">
+
+			<img id="note_7" class="note" src="img/NOTE_IMG/music_white.png">
+			<img id="note_8" class="note" src="img/NOTE_IMG/music_violet.png">
+			<img id="note_9" class="note" src="img/NOTE_IMG/music_green.png">
+			<img id="note_10" class="note" src="img/NOTE_IMG/music_yellow.png">
+			<img id="note_11" class="note" src="img/NOTE_IMG/music_blue.png">
+			<img id="note_12" class="note" src="img/NOTE_IMG/music_white.png">
+			<img id="note_13" class="note" src="img/NOTE_IMG/music_red.png">
+
+
+
+		</div>
+
+		<!-- 2nd ( LEVEL SELECTION ) VIEW -->
+		<div class="level_view">
+
+		</div>
+
+
+	</body>
+</html>
+
+
+<!--  
+
+<script src="http://localhost:9001/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="js/interaction.js"></script>
+
+-->

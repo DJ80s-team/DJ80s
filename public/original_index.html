@@ -1,0 +1,452 @@
+		<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+		<link rel="stylesheet"  type="text/css" href="css/style_index.css" />
+	</head>
+	<body>
+		<audio controls autoplay loop>
+			<source src="testSong.wav" type="audio/wav">
+			</audio>
+		<h1>Let's Play with DJ BOX !!</h1>
+		<h2 class="score"> SCORE : 0</h2>
+		<canvas id="countingDownCanvas" width = 1000 height = 550></canvas>
+		<canvas id="awesomeCanvas" width=1000 height=550></canvas>
+		<p class="comboMsg"></p>
+		<p class="msg"></p>
+		<p class="result"></p>
+		<p class="info"></p>
+
+		<script type="text/javascript">
+
+		</script>
+
+		<br><br>
+		<div id="slider"></div>
+
+		<script src="http://localhost:9001/socket.io/socket.io.js"></script>
+
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+
+		<script>
+
+			var socket = io.connect('http://localhost:9001');
+
+			var canvas = document.getElementById("awesomeCanvas");
+			var countingDownCanvas = document.getElementById("countingDownCanvas");
+			var ctx = canvas.getContext("2d");
+			var ctx0 = countingDownCanvas.getContext("2d");
+			var canvasWidth = canvas.width;
+			var canvasHeight = canvas.height;
+			var color = '#FFFFFF';
+			var ballColor;
+			var ballSize = 26;
+			var s = 0;
+			var score = 0;
+			var start = false;
+			var prevValue;
+			var currentValue;
+			var comboState = 0;
+
+			var numberOfBalls = 77;
+
+			window.requestAnimFrame = (function(callback) {
+		        return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+		        function(callback) {
+		          window.setTimeout(callback, 1000 / 60);
+		        };
+		      })();
+
+
+		    function countingDown(canvas, context, startTime){
+		    	var time = (new Date()).getTime() - startTime;
+		    	console.log(time);
+		    	if(time >= 0 && time <1000){
+		    		$('.msg').text(" 3 ");
+		    		$('.msg').css("color", "blue");
+		    	// clear
+			        context.clearRect(0, 0, canvas.width, canvas.height);
+
+
+			        // request new frame
+			        requestAnimFrame(function() {
+			          countingDown(countingDownCanvas, ctx0, startTime);
+			        });
+			        console.log("one");
+		    	}else if(time >= 1000 && time <2000){
+		    		$('.msg').text(" 2 ");
+		    		$('.msg').css("color", "green");
+
+		    	// clear
+			        context.clearRect(0, 0, canvas.width, canvas.height);
+
+
+			        // request new frame
+			        requestAnimFrame(function() {
+			          countingDown(countingDownCanvas, ctx0, startTime);
+			        });
+			        console.log("two");
+		    	}else if(time >= 2000 && time <3000){
+		    		$('.msg').text(" 1 ");
+		    		$('.msg').css("color", "yellow");
+
+		    	// clear
+			        context.clearRect(0, 0, canvas.width, canvas.height);
+
+
+			        // request new frame
+			        requestAnimFrame(function() {
+			          countingDown(countingDownCanvas, ctx0, startTime);
+			        });
+			        console.log("three");
+		    	}else if(time >= 3000 && time <4000){
+		    		$('.msg').css("font-size", "130px");
+		    		$('.msg').css("color", "red");
+		    		$('.msg').text(" START! ");
+
+		    	// clear
+			        context.clearRect(0, 0, canvas.width, canvas.height);
+
+
+			        // request new frame
+			        requestAnimFrame(function() {
+			          countingDown(countingDownCanvas, ctx0, startTime);
+			        });
+			        console.log("starting");
+
+			        
+				      
+		    	}else if(time >= 4000){
+		    		$('.msg').text("");
+
+		    	// clear
+			        context.clearRect(0, 0, canvas.width, canvas.height);
+
+		    		// request new frame
+				        animate(playerBar, balls, canvas, ctx, startTime);
+		    	}
+
+		    }
+		      
+			        		
+		    function animate(playerBar, balls, canvas, context, startTime) {
+			        
+			        // update
+			        var time = (new Date()).getTime() - startTime;
+
+			        var gravity = 100;
+
+			        for(var i =0; i < numberOfBalls; i++){
+			        	balls[i].y = balls[i].y + 0.05 * gravity;
+
+			    	}
+
+			    	if(playerBar.x + playerBar.width >= canvasWidth){
+			    		playerBar.x = canvasWidth - playerBar.width;
+			    	}else if(playerBar.x  <= 0){
+			    		playerBar.x = 0;
+			    	}
+
+
+			    	if(currentValue >= 0){
+						if(prevValue != currentValue){
+								if(prevValue < currentValue && playerBar.x <= canvasWidth - playerBar.width){
+									playerBar.x += Math.abs(currentValue - prevValue) *5;
+									$(function(){
+							// $('embed').remove();
+							// $('body').append('<embed src=\"scratch01.wav\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
+						});
+
+								}else if(prevValue > currentValue && playerBar.x >= 0){
+									playerBar.x -= Math.abs(currentValue - prevValue) *5;
+									$(function(){
+							// $('embed').remove();
+							// $('body').append('<embed src=\"scratch02.wav\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
+						});
+								}
+
+								prevValue = currentValue;
+
+						}
+					}else if(currentValue <0){
+						if(prevValue != currentValue){
+								if(prevValue < currentValue && playerBar.x <= canvasWidth - playerBar.width){
+									playerBar.x -= Math.abs(currentValue - prevValue) *5;
+									$(function(){
+							// $('embed').remove();
+							// $('body').append('<embed src=\"scratch03.wav\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
+						});
+
+								}else if(prevValue > currentValue && playerBar.x >= 0){
+									playerBar.x += Math.abs(currentValue - prevValue) *5;
+									$(function(){
+							// $('embed').remove();
+							// $('body').append('<embed src=\"scratch04.wav\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
+						});
+
+								}
+
+								prevValue = currentValue;
+
+						}
+					}
+
+	
+					
+
+			        for(var i =0; i < numberOfBalls; i++){
+			        	if(balls[i].color == color && balls[i].x >= playerBar.x -3 && balls[i].x + 30 <= playerBar.x + playerBar.width + 3 && balls[i].y >= 50 && balls[i].color != 'white'){
+			        		balls[i].x = 5000;
+			        		s++;
+			        		state = 1;
+			        		
+			        		time4msg = (new Date()).getTime();			        
+			        		score += s*100;	
+			        		comboState ++;
+			        		$('.comboMsg').css("color", "orange");
+			        		$('.comboMsg').text("Combo "+ comboState);		
+
+			        	}else if(balls[i].color == 'white' && balls[i].x >= playerBar.x -3 && balls[i].x + 30 <= playerBar.x + playerBar.width + 3 && balls[i].y >= 50 && color != '#FFFFFF'){
+			        		console.log(color);
+			        		balls[i].x = 5000;
+			        		s= s+0.5;
+			        		state = 1;
+			        		time4msg = (new Date()).getTime();			        
+			        		score += s*50;	
+			        		comboState++;
+			        		$('.comboMsg').css("color", "orange");	
+			        		$('.comboMsg').text("Combo "+ comboState);		
+
+			        	}else if(balls[i].x >= 0 && balls[i].x <= canvasWidth && balls[i].y > canvasHeight){
+			        		balls[i].x = 5000;
+			        		s--;
+			        		state = 0;
+			        		time4msg = (new Date()).getTime();
+			        		comboState = 0;
+			        		$('.comboMsg').text("");
+			        	}
+
+			        	score = s * 100;
+			        	$('.score').text("SCORE : " + score);
+
+
+				     }
+
+				     console.log(comboState);
+
+				     if(comboState == 3){
+				     	console.log(" 3 combo!");
+				     	score = score + 1000;
+				     	$('.comboMsg').text("Combo bonus +1000 !");
+				     	$('.score').text("SCORE : " + score);
+
+				     }else if(comboState == 6){
+				     	console.log(" 6 combo!");
+				     	score = score + 2000;
+				     	$('.comboMsg').text("Combo bonus +2000 !");
+				     	$('.score').text("SCORE : " + score);
+
+				     }else if(comboState == 10 ){
+				     	console.log(" 10 combo!");
+				     	score = score + 5000;
+				     	$('.comboMsg').text("Combo bonus +5000 !");
+				     	$('.score').text("SCORE : " + score);
+
+				     }else{
+				     	$('.comboMsg').text("");
+				     }
+
+				     var countingBalls=0;
+				    for(var i =0; i < numberOfBalls; i++){
+				    	if(balls[i].y > canvasHeight){
+				    		countingBalls++;
+				    	}
+				    }
+
+				    if(countingBalls == numberOfBalls){
+				    	$('.msg').text(" W I N ");
+				    	$('.result').text(" Your score is " + score);
+				    	$('.info').text("Refresh to play again!");
+				    	 $('embed').remove();
+							 $('body').append('<embed src=\"scratch02.wav\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
+				    	//$(this).clear();
+				    	// $(body).append("<p id=\"playAgainButton\"><input type=\"image\" src=\"buttonIMG.gif\" onclick=\"playAgain()\">");				    	
+				    }
+
+				    if(score < -500){
+			        	$('.msg').text(" L O S E ");
+			        	$('.result').text(" Your score is " + score);
+			        	$('.info').text("Refresh to play again!");
+			        	 $('embed').remove();
+							 $('body').append('<embed src=\"scratch03.wav\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
+			        	$(this).clear();
+			        	$(body).append("<p id=\"playAgainButton\"><input type=\"image\" src=\"buttonIMG.gif\" onclick=\"playAgain()\">");	
+			        }
+
+
+
+			        
+
+			        // if(((new Date()).getTime() - time4msg) < 1 && state ==1){
+			        // 	$('.msg').text(" Excellent ! ");
+			        // }else if(((new Date()).getTime() - time4msg) < 1 && state ==0){
+			        // 	$('.msg').text(" Missed ! ");
+			        // } 
+
+			        // console.log(((new Date()).getTime());
+
+
+
+			        // clear
+			        context.clearRect(0, 0, canvas.width, canvas.height);
+
+			        drawPlayerBar(playerBar, ctx);
+
+			        for(var i =0; i < numberOfBalls; i++)
+			        	drawBalls(balls[i], ctx);
+
+
+			        // request new frame
+			        requestAnimFrame(function() {
+			          animate(playerBar, balls, canvas, context, startTime);
+			        });
+	      	}
+			
+			
+			function playAgain(){
+			    $('#playAgainButton').remove();
+			    s = 0;
+				score = 0;
+				prevValue = 0;
+				currentValue = 0;
+				comboState = 0
+			     setTimeout(function() {
+				        var startTime = (new Date()).getTime();
+				        countingDown(countingDownCanvas, ctx0, startTime);
+				      }, 0);   	
+			 }
+
+			var playerBar = {
+				x: canvasWidth/2 - 50,
+				y: canvasHeight - 20,
+				opacity : 0.1,
+				width: 100,
+				height: 50
+			};
+
+			var balls = new Array(numberOfBalls);
+			
+			for(var i = 0; i < numberOfBalls; i++){
+				var randomMaker = Math.random() * 10;
+
+					if(randomMaker >=  0 && randomMaker < 2){
+						ballColor ='white';
+					}else if(randomMaker >=  2 && randomMaker < 4){
+						ballColor ='red';
+					}else if(randomMaker >=  4 && randomMaker < 6){
+						ballColor ='yellow';
+					}else if(randomMaker >=  6 && randomMaker < 8){
+						ballColor ='green';
+					}else if(randomMaker >=  8 && randomMaker < 10){
+						ballColor ='blue';
+					}
+
+				balls[i] = {
+					x: Math.random()*canvasWidth,
+					y: Math.random() * canvasHeight * i* -0.3,
+					opacity: 0.1,
+					color: ballColor
+
+				};
+			}
+			function drawPlayerBar(playerBar, context){
+				context.beginPath();
+		        context.rect(playerBar.x, playerBar.y, playerBar.width, playerBar.height);
+		        context.fillStyle = color;
+		        context.fill();
+
+		        if(start){
+			        context.rect(playerBar.x, 0, playerBar.width, canvasWidth);
+
+			        // add linear gradient
+				    var grd = context.createLinearGradient(0, 0, 0, canvas.height);
+				    grd.addColorStop(0, '#252525');  
+				    grd.addColorStop(1, color);
+				    context.fillStyle = grd;
+				    context.fill();
+				}
+			}
+
+
+
+			
+			function drawBalls(ball, context){
+				context.beginPath();
+			    context.arc(ball.x, ball.y, ballSize, 0, 2 * Math.PI, false);
+			    context.fillStyle = ball.color;
+			    context.fill();
+			}
+
+			socket.on('controller', function(data) {
+					
+					currentValue = data;		
+					
+			});
+			
+			
+
+			socket.on('button', function(data) {
+				
+
+				if(data == 25956){
+						color = 'red';
+						// $(function(){
+						// 	$('embed').remove();
+						// 	$('body').append('<embed src=\"beat01.wav\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
+						// });
+					}else if(data == 28535){
+						color = 'yellow';
+						// $(function(){
+						// 	$('embed').remove();
+						// 	$('body').append('<embed src=\"beat02.wav\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
+						// });
+					}else if(data == 25966){
+						color = 'green';
+						// $(function(){
+						// 	$('embed').remove();
+						// 	$('body').append('<embed src=\"beat03.wav\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
+						// });					
+					}else if(data == 30053){
+						color = 'blue';
+						// $(function(){
+						// 	$('embed').remove();
+						// 	$('body').append('<embed src=\"beat04.aif\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
+						// });
+
+					}else if(data == 28261){
+						color = 'white';
+						// $(function(){
+						// 	$('embed').remove();
+						// 	$('body').append('<embed src=\"beat04.aif\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
+						// });
+
+					}
+
+					start = true;			
+
+				});
+
+
+
+			// wait one second before starting animation
+		      setTimeout(function() {
+				        var startTime = (new Date()).getTime();
+				        countingDown(countingDownCanvas, ctx0, startTime);
+				      }, 0);
+			        //});
+
+		</script>
+
+	</body>
+</html>
