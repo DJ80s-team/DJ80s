@@ -10,19 +10,119 @@
 
 		<script>
 
-		$(document).ready(function(){
+/*		$(document).ready(function(){
 
-			$('#logo').click(function(){
+			$('#logo').click(function(){ // when logo clicked
 
-				setTimeout(function(){
 					$('.logo_view').addClass('animated fadeOut');
 					setTimeout(function(){
 	                	$('.level_view').show().addClass('animated bounceInUp');
-	            	},500);
-            	},1000);
+	            	},450);
+
+	            	setTimeout(function(){
+	            		$('.loading_note').show().addClass('animated flash');
+	            	},1500);
+
+	            	setTimeout(function(){ // wait for blink effect on CSS.
+
+	            		$('#lp').animate({
+	            			'left': '-10%'
+	            		},4500, function(){
+	            			$('#lp').animate({
+		            			'left': '50%'
+		            		},2000);
+	            		});
+
+	            		setTimeout(function(){
+		            		$('#note_g').css({
+		            			'display': 'none'
+		            		});
+		            		$('.loading_lp').css({
+		            			'background-color': '#21ED79'
+		            		});
+		            	},1000);
+		            	// setTimeout(function(){
+		            	// 	$('.loading_lp').css({
+		            	// 		'background-color': '#FFE2F7'
+		            	// 	});
+		            	// },1950);
+
+
+		            	setTimeout(function(){
+		            		$('#note_y').css({
+		            			'display': 'none'
+		            		});
+		            		$('.loading_lp').css({
+		            			'background-color': '#FFDE1D'
+		            		});
+		            	},1900);
+		            	// setTimeout(function(){
+		            	// 	$('.loading_lp').css({
+		            	// 		'background-color': '#FFE2F7'
+		            	// 	});
+		            	// },2450);
+
+
+		            	setTimeout(function(){
+		            		$('#note_b').css({
+		            			'display': 'none'
+		            		});
+		            		$('.loading_lp').css({
+		            			'background-color': '#1A82FF'
+		            		});
+		            	},2300);
+		            	// setTimeout(function(){
+		            	// 	$('.loading_lp').css({
+		            	// 		'background-color': '#FFE2F7'
+		            	// 	});
+		            	// },2950);
+
+
+		            	setTimeout(function(){
+		            		$('#note_r').css({
+		            			'display': 'none'
+		            		});
+		            		$('.loading_lp').css({
+		            			'background-color': '#FF1768'
+		            		});
+		            	},2800);
+		            	setTimeout(function(){
+		            		$('.loading_lp').animate({
+		            			'background-color': '#FFE2F7'
+		            		}, function(){
+
+		            			setTimeout(function(){
+		            				$('.dim').animate({
+				            			'opacity' : '.9'
+				            		});
+				            		$('.info').animate({
+				            			'opacity' : '1'
+				            		});
+				            		$('.instruction').animate({
+				            			'opacity' : '1'
+				            		});
+			            		}, 1500);
+
+			            	});
+
+		            	},5100);
+
+	            	},4500); // wait for blinking effect of loading music notes
+
+			}); //logo click function
+
+			$('#instruction').click(function(){
+				$('.level_view').animate({
+					'top':'100%'
+				},'slow');
+				$('.game_view').animate({
+        			'top' : '0%'
+        		},'slow');
 			});
 
-		});
+		}); //document ready/
+
+*/
 
 		</script>
 
@@ -30,7 +130,7 @@
 	<body>
 
 		<!-- 1st ( START ) VIEW -->
-		<div class="logo_view">
+		<section class="logo_view">
 			<div class="logo_container">
 				<img id="logo" src="img/TITLE/TITLE.png">
 				<img id="enter" src="img/TITLE/ENTER.png">
@@ -51,14 +151,65 @@
 			<img id="note_12" class="note" src="img/NOTE_IMG/music_white.png">
 			<img id="note_13" class="note" src="img/NOTE_IMG/music_red.png">
 
-
-
-		</div>
+		</section>
 
 		<!-- 2nd ( LEVEL SELECTION ) VIEW -->
-		<div class="level_view">
+		<section class="level_view">
 
-		</div>
+			<img id="note_r" class="loading_note" src="img/NOTE_IMG/01_red_219_153.png">
+			<img id="note_b" class="loading_note" src="img/NOTE_IMG/02_blue_1115_538.png">
+			<img id="note_y" class="loading_note" src="img/NOTE_IMG/03_yellow_634_942.png">
+			<img id="note_g" class="loading_note" src="img/NOTE_IMG/06_green_850_2157.png">
+
+			<div id="lp">
+				<div id="lp_1" class="loading_lp"><div id="lp_inner_1" class="loading_lp_inner"></div></div>
+				<div id="lp_2" class="loading_lp"><div id="lp_inner_2" class="loading_lp_inner"></div></div>
+				<div id="lp_3" class="loading_lp"><div id="lp_inner_3" class="loading_lp_inner"></div></div>
+				<div id="lp_4" class="loading_lp"><div id="lp_inner_4" class="loading_lp_inner"></div></div>
+				<div id="lp_5" class="loading_lp"></div>
+			</div>
+
+			<div class="dim"></div>
+
+			<div class="info">
+				<div id="info_title" class="title">Hello, Hello</div>
+				<div id="info_singer" class="singer"><span id="level" class="level">EASY</span> Hey You</div>
+				
+
+				
+
+			</div>
+
+			<div id="instruction" class="instruction">Turn It To START !</div>
+
+
+		</section>
+
+		<!-- 3rd ( GAME ) VIEW -->
+		<section class="game_view">
+
+			<!-- real game interactive area. balls fall down and shoot by turuing turntable -->
+			<div class="game_area">
+				<div id="slot_01" class="slot">
+					<img id="n1" class="game_note" src="img/GAME/GAME_music/red_94.png">
+					<div id="slotBox_back_01" class="slot_box_background"></div>
+					<div id="slotBox_01" class="slot_color_box"><img class="game_box_note" src="img/NOTE_IMG/music_white_inner.png"></div>
+				</div>
+				<div id="slot_02" class="slot">
+					<div id="slotBox_back_02" class="slot_box_background"></div>
+					<div id="slotBox_02" class="slot_color_box"><img class="game_box_note" src="img/NOTE_IMG/music_white_inner.png"></div>
+				</div>
+				<div id="slot_03" class="slot">
+					<div id="slotBox_back_03" class="slot_box_background"></div>
+					<div id="slotBox_03" class="slot_color_box"><img class="game_box_note" src="img/NOTE_IMG/music_white_inner.png"></div>
+				</div>
+				<div id="slot_04" class="slot">
+					<div id="slotBox_back_04" class="slot_box_background"></div>
+					<div id="slotBox_04" class="slot_color_box"><img class="game_box_note" src="img/NOTE_IMG/music_white_inner.png"></div>
+				</div>
+			</div>
+
+		</section>
 
 
 	</body>
