@@ -1,11 +1,23 @@
+#include <Adafruit_NeoPixel.h>
+
+#define PIN_R 8
+#define PIN_B 9
+#define PIN_Y 10
+#define PIN_G 11
+
+Adafruit_NeoPixel neon_r = Adafruit_NeoPixel(60, PIN_R, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel neon_b = Adafruit_NeoPixel(60, PIN_B, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel neon_y = Adafruit_NeoPixel(60, PIN_Y, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel neon_g = Adafruit_NeoPixel(60, PIN_G, NEO_GRB + NEO_KHZ800);
+
+
 //const int outputPin = 12;
 int potPin = 0;
 int sensorVal = 0;
 int prevVal = 0;
 String inputString = "";
 
-int soundPin = 12;
-int ledPin [] = {8,9,10,11};
+//int ledPin [] = {8,9,10,11};
 int buttons [] = {4,5,6,7};
 int buttonState [4];
 
@@ -23,20 +35,41 @@ int lastLSB = 0;
 
 void setup()
 {
- 
-  for(int i=0; i<4; i++){
-    pinMode(ledPin[i], OUTPUT);
-  }
+  
+  neon_r.begin();
+  neon_r.setPixelColor(0,neon_r.Color(255, 23, 107));
+  neon_r.show();
+  pinMode(PIN_R, OUTPUT);
+  
+  neon_b.begin();
+  neon_b.setPixelColor(0,neon_b.Color(26, 130, 255));
+  neon_b.show();
+  pinMode(PIN_B, OUTPUT);
+  
+  neon_y.begin();
+  neon_y.setPixelColor(0,neon_y.Color(255, 222, 29));
+  neon_y.show();
+  pinMode(PIN_Y, OUTPUT);
+  
+  neon_g.begin();
+  neon_g.setPixelColor(0,neon_g.Color(33, 237, 112));
+  neon_g.show();
+  pinMode(PIN_G, OUTPUT);
+  
+// 
+//  for(int i=0; i<4; i++){
+//    pinMode(ledPin[i], OUTPUT);
+//  }
   
 //  pinMode(outputPin, OUTPUT);
   Serial.begin(57600);
   
   for(int i=0; i<4; i++){
-    pinMode(ledPin[i], OUTPUT);
+//    pinMode(ledPin[i], OUTPUT);
     pinMode(buttons[i], INPUT);
     digitalWrite(buttons[i], HIGH);
   }
-  pinMode(soundPin, OUTPUT);
+//  pinMode(soundPin, OUTPUT);
   
   pinMode(encoderPin1, INPUT); 
   pinMode(encoderPin2, INPUT);
@@ -55,62 +88,85 @@ void loop()
    //noTone(soundPin);
   for(int i=0; i<4; i++)
     buttonState[i] = digitalRead(buttons[i]);
+    
+    if((encoderValue - prevVal)>0){
+      if(abs((encoderValue - prevVal))>20){
+        Serial.print('B');
+        Serial.print("left");
+        Serial.print('E');
+        
+        prevVal = encoderValue;
+      }
+    }else if((encoderValue - prevVal)<0){
+      if(abs((encoderValue - prevVal))>20){
+        Serial.print('B');
+        Serial.print("right");
+        Serial.print('E');
+        
+        prevVal = encoderValue;
+      }
+    }
   
-   Serial.print('B');
-  Serial.print(encoderValue);
-  Serial.print('E');
   
   delay(10);
   
    if(!buttonState[0] == HIGH){ //red
     Serial.print('S');
-    Serial.print('red');
+    Serial.print("red");
     Serial.print('F');
     //tone(soundPin, 100);
-    digitalWrite(ledPin[0], LOW);
+    neon_r.setPixelColor(0,neon_r.Color(255, 255, 255));
+    neon_r.show();
     //toneEffect();
     delay(10);
-  }else if(!buttonState[1] == HIGH){ //yellow
+  }else if(!buttonState[1] == LOW){
+    neon_r.setPixelColor(0,neon_r.Color(255, 23, 107));
+    neon_r.show();
+  }
+ 
+ if(!buttonState[1] == HIGH){ //blue
     Serial.print('S');
-    Serial.print('yellow');
+    Serial.print("blue");
     Serial.print('F');
     //tone(soundPin, 200);
-    digitalWrite(ledPin[1], LOW);
+    neon_b.setPixelColor(0,neon_r.Color(255, 255, 255));
+    neon_b.show();
     //toneEffect();
     delay(10);
-  }else if(!buttonState[2] == HIGH){ //green
-    Serial.print('S');
-    Serial.print('green');
-    Serial.print('F');
-    //tone(soundPin, 300);
-    digitalWrite(ledPin[2], LOW);
-    //toneEffect();
-    delay(10);
-  }else if(!buttonState[3] == HIGH){ //blue
-    Serial.print('S');
-    Serial.print('blue');
-    Serial.print('F');
-    //tone(soundPin, 400);
-    digitalWrite(ledPin[3], LOW);
-    //toneEffect();
-    delay(10);
-  }else{
-  for(int i=0; i<4; i++) 
-    digitalWrite(ledPin[i], HIGH);
+  }else if(!buttonState[1] == LOW){
+    neon_b.setPixelColor(0,neon_b.Color(26, 130, 255));
+    neon_b.show();
   }
   
-  // arduino reads Serial
-//  if (Serial.available() > 0) {
-//    int incomingByte = Serial.read();
-// 
-//    if (incomingByte == 1) { // 0x01 = char 1
-//      for(int i = 0; i <4; i++){
-// //         tone(soundPin, 100+i*100);
-//          delay(50);
-//      }
-// //     noTone(soundPin);
-//    } 
-//  }
+  if(!buttonState[2] == HIGH){ //yellow
+    Serial.print('S');
+    Serial.print("yellow");
+    Serial.print('F');
+    //tone(soundPin, 300);
+    neon_y.setPixelColor(0,neon_r.Color(255, 255, 255));
+    neon_y.show();
+    //toneEffect();
+    delay(10);
+  }else if(!buttonState[1] == LOW){
+    neon_y.setPixelColor(0,neon_y.Color(255, 222, 29));
+    neon_y.show();
+  }
+  
+  if(!buttonState[3] == HIGH){ //green
+    Serial.print('S');
+    Serial.print("green");
+    Serial.print('F');
+    //tone(soundPin, 400);
+    neon_g.setPixelColor(0,neon_r.Color(255, 255, 255));
+    neon_g.show();
+    //toneEffect();
+    delay(10);
+  }else if(!buttonState[1] == LOW){
+    neon_g.setPixelColor(0,neon_g.Color(33, 237, 112));
+    neon_g.show();
+  }
+  
+
 }
 
 void updateEncoder(){
@@ -126,8 +182,3 @@ void updateEncoder(){
   lastEncoded = encoded; //store this value for next time
 }
 
-void toneEffect(){
-  
-//  noTone(soundPin);
-    
-}

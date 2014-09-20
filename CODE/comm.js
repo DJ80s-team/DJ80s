@@ -71,16 +71,16 @@ arduino.on('data', function(data) { // data comes in Buffer <   >
 	// util.log(data);
 	receivedData += data;
 	// basically says if there're 'E' and 'B' signals
-	// if (receivedData.indexOf('E') >= 0 && receivedData.indexOf('B') >= 0) {
-	// 	// save the data between 'B' and 'E'
-	// 	sendData = receivedData.substring(receivedData.indexOf('B') + 1, receivedData.indexOf('E'));
-	// 	receivedData = '';
-	// 	util.log(sendData);
-	// 	// parse data to browser
-	// 	io.sockets.emit('controller', sendData);
-	// 	// socket.io
-	// 	// emit, on, broadcast.emit, io.sockets.emit
-	// }
+	if (receivedData.indexOf('E') >= 0 && receivedData.indexOf('B') >= 0) {
+		// save the data between 'B' and 'E'
+		sendData = receivedData.substring(receivedData.indexOf('B') + 1, receivedData.indexOf('E'));
+		receivedData = '';
+		util.log(sendData);
+		// parse data to browser
+		io.sockets.emit('controller', sendData);
+		// socket.io
+		// emit, on, broadcast.emit, io.sockets.emit
+	}
 
 	if (receivedData.indexOf('S') >= 0 && receivedData.indexOf('F') >= 0) {
 		// save the data between 'S' and 'F'
