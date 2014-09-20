@@ -932,7 +932,21 @@ p.combo_text{
 	100%{opacity:1;}
 }
 
+#countingDownCanvas{
+	position:absolute;
+	width:100%;
+	height:100%;
+	top:0;
+	left:0;
+}
 
+#awesomeCanvas{
+	position:absolute;
+	width:100%;
+	height:100%;
+	top:0;
+	left:0;
+}
 
 
 
