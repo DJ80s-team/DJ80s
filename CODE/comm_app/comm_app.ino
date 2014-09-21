@@ -1,9 +1,9 @@
 #include <Adafruit_NeoPixel.h>
 
 #define PIN_R 8
-#define PIN_B 9
-#define PIN_Y 10
-#define PIN_G 11
+#define PIN_Y 9
+#define PIN_G 10
+#define PIN_B 11
 
 Adafruit_NeoPixel neon_r = Adafruit_NeoPixel(60, PIN_R, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel neon_b = Adafruit_NeoPixel(60, PIN_B, NEO_GRB + NEO_KHZ800);
@@ -32,6 +32,8 @@ long lastencoderValue = 0;
 
 int lastMSB = 0;
 int lastLSB = 0;
+
+boolean pushed [] = {false,false,false,false};
 
 void setup()
 {
@@ -90,7 +92,7 @@ void loop()
     buttonState[i] = digitalRead(buttons[i]);
     
     if((encoderValue - prevVal)>0){
-      if(abs((encoderValue - prevVal))>20){
+      if(abs((encoderValue - prevVal))>15){
         Serial.print('B');
         Serial.print("left");
         Serial.print('E');
@@ -98,7 +100,7 @@ void loop()
         prevVal = encoderValue;
       }
     }else if((encoderValue - prevVal)<0){
-      if(abs((encoderValue - prevVal))>20){
+      if(abs((encoderValue - prevVal))>15){
         Serial.print('B');
         Serial.print("right");
         Serial.print('E');
@@ -111,62 +113,77 @@ void loop()
   delay(10);
   
    if(!buttonState[0] == HIGH){ //red
+    pushed[0] = true;
     Serial.print('S');
     Serial.print("red");
     Serial.print('F');
-    //tone(soundPin, 100);
     neon_r.setPixelColor(0,neon_r.Color(255, 255, 255));
     neon_r.show();
-    //toneEffect();
-    delay(10);
-  }else if(!buttonState[1] == LOW){
+  }else if(!buttonState[0] == LOW){
+    if(pushed[0] == true){
+      pushed[0] = false;
+      Serial.print('S');
+      Serial.print("r_released");
+      Serial.print('F');
+    }
     neon_r.setPixelColor(0,neon_r.Color(255, 23, 107));
     neon_r.show();
   }
+  
+   if(!buttonState[1] == HIGH){ //yellow
+    pushed[1] = true;
+    Serial.print('S');
+    Serial.print("yellow");
+    Serial.print('F');
+    neon_y.setPixelColor(0,neon_r.Color(255, 255, 255));
+    neon_y.show();
+  }else if(!buttonState[1] == LOW){
+    if(pushed[1] == true){
+      pushed[2] = false;
+      Serial.print('S');
+      Serial.print("y_released");
+      Serial.print('F');
+    }
+    neon_y.setPixelColor(0,neon_y.Color(255, 222, 29));
+    neon_y.show();
+  }
  
- if(!buttonState[1] == HIGH){ //blue
+  if(!buttonState[2] == HIGH){ //green
+   pushed[2] = true;
+    Serial.print('S');
+    Serial.print("green");
+    Serial.print('F');
+    neon_g.setPixelColor(0,neon_r.Color(255, 255, 255));
+    neon_g.show();
+  }else if(!buttonState[2] == LOW){
+    if(pushed[2] == true){
+      pushed[2] = false;
+      Serial.print('S');
+      Serial.print("g_released");
+      Serial.print('F');
+    }
+    neon_g.setPixelColor(0,neon_g.Color(33, 237, 112));
+    neon_g.show();
+  }
+ 
+ if(!buttonState[3] == HIGH){ //blue
+  pushed[3] = true;
     Serial.print('S');
     Serial.print("blue");
     Serial.print('F');
-    //tone(soundPin, 200);
     neon_b.setPixelColor(0,neon_r.Color(255, 255, 255));
     neon_b.show();
-    //toneEffect();
-    delay(10);
-  }else if(!buttonState[1] == LOW){
+  }else if(!buttonState[3] == LOW){
+    if(pushed[3] == true){
+      pushed[3] = false;
+      Serial.print('S');
+      Serial.print("b_released");
+      Serial.print('F');
+    }
     neon_b.setPixelColor(0,neon_b.Color(26, 130, 255));
     neon_b.show();
   }
   
-  if(!buttonState[2] == HIGH){ //yellow
-    Serial.print('S');
-    Serial.print("yellow");
-    Serial.print('F');
-    //tone(soundPin, 300);
-    neon_y.setPixelColor(0,neon_r.Color(255, 255, 255));
-    neon_y.show();
-    //toneEffect();
-    delay(10);
-  }else if(!buttonState[1] == LOW){
-    neon_y.setPixelColor(0,neon_y.Color(255, 222, 29));
-    neon_y.show();
-  }
-  
-  if(!buttonState[3] == HIGH){ //green
-    Serial.print('S');
-    Serial.print("green");
-    Serial.print('F');
-    //tone(soundPin, 400);
-    neon_g.setPixelColor(0,neon_r.Color(255, 255, 255));
-    neon_g.show();
-    //toneEffect();
-    delay(10);
-  }else if(!buttonState[1] == LOW){
-    neon_g.setPixelColor(0,neon_g.Color(33, 237, 112));
-    neon_g.show();
-  }
-  
-
 }
 
 void updateEncoder(){

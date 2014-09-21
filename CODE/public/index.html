@@ -23,6 +23,24 @@ $(document).ready(function(){
 *	step 5: grade 		*
 *************************/
 
+var canvas = document.getElementById("awesomeCanvas");
+var countingDownCanvas = document.getElementById("countingDownCanvas");
+var ctx = canvas.getContext("2d");
+var ctx0 = countingDownCanvas.getContext("2d");
+var canvasWidth = canvas.width;
+var canvasHeight = canvas.height;
+var color = '#FFFFFF';
+var ballColor;
+var ballSize = 5;
+var s = 0;
+var score = 0;
+var start = false;
+var prevValue = 0;
+var currentValue;
+var comboState = 0;
+
+var numberOfBalls = 10;
+
 var step = 0;  
 var m_number = 1;
 var selected_level = 'n';
@@ -32,6 +50,8 @@ var cur_lv = 0;
 var selected_song = "";
 var selected_artist = "";
 var highest_score = 0;
+var curValue = 1;
+var score=0;
 
 
 
@@ -40,8 +60,6 @@ var socket = io.connect('http://localhost:9001');
 			
 	socket.on('controller', function(data) {
 			currentValue = data;	
-			console.log(currentValue);
-
 
 			if(step == 2 && data == 'right'){
 				interaction_02(true);
@@ -51,6 +69,72 @@ var socket = io.connect('http://localhost:9001');
 				interaction_03(cur_lv);
 			}else if(step ==4 && data){
 				interaction_04("controller", data);	
+				if(data == "right"){
+					if(prevValue == 0){
+						prevValue++;
+						// playerBar.x = (canvasWidth/4 * prevValue) + 3;
+
+						$('#active_slot').css({
+							'left':'25%',
+						});		
+						curValue = 2;
+					}else if(prevValue == 1){
+							prevValue++;
+						//playerBar.x = (canvasWidth/4 * prevValue) + 3;
+						$('#active_slot').css({
+							'left':'50%',
+						});	
+						curValue = 3;
+					}else if(prevValue == 2){
+							prevValue++;
+						//playerBar.x = (canvasWidth/4 * prevValue) + 3;
+						$('#active_slot').css({
+							'left':'75%',
+						});
+						curValue = 4;
+					}else if(prevValue == 3){
+						//playerBar.x = (canvasWidth/4 * prevValue) + 3;
+						// $('#active_slot').css({
+						// 	'left':'0%',
+						// });
+						curValue = 4;
+					}
+
+
+				}else if(data == "left"){
+
+					if(prevValue == 0){
+						//prevValue=3;
+						//playerBar.x = (canvasWidth/4 * prevValue) + 3;
+						// $('#active_slot').css({
+						// 	'left':'75%',
+						// });	
+						curValue = 1;
+					}else if(prevValue == 1){
+							prevValue--;
+						//playerBar.x = (canvasWidth/4 * prevValue) + 3;
+						$('#active_slot').css({
+							'left':'0%',
+						});
+						curValue = 1;
+					}else if(prevValue == 2){
+							prevValue--;
+						//playerBar.x = (canvasWidth/4 * prevValue) + 3;
+						$('#active_slot').css({
+							'left':'25%',
+						});
+						curValue = 2;
+					}else if(prevValue == 3){
+							prevValue--;
+						//playerBar.x = (canvasWidth/4 * prevValue) + 3;
+						$('#active_slot').css({
+							'left':'50%',
+						});	
+						curValue = 3;
+					}
+				}
+				console.log(curValue);
+
 			}
 
 				
@@ -58,12 +142,15 @@ var socket = io.connect('http://localhost:9001');
 	});
 
 	socket.on('button', function(data) {
-		
-			if(step == 0 && data == 'red'){
-				transition_00();
-			}else if(step ==0 && data == 'blue'){}
 
-			if(step == 2 && data == 'red'){
+
+	start = true;	
+		
+			if(step == 0 && data == 'r_released'){
+				transition_00();
+			}else if(step ==0 && data == 'b_released'){}
+
+			if(step == 2 && data == 'r_released'){
 
 				if (cur_lv == 0){
 					$('.m_easy').show();
@@ -77,12 +164,12 @@ var socket = io.connect('http://localhost:9001');
 
 				transition_02();
 
-			}else if(step ==2 && data == 'blue'){
+			}else if(step ==2 && data == 'b_released'){
 
 				transition_back_00();
 			}
 
-			if(step ==3 && data == 'blue'){
+			if(step ==3 && data == 'b_released'){
 
 				transition_back_02();
 				
@@ -105,21 +192,233 @@ var socket = io.connect('http://localhost:9001');
 				}
 
 				
-			}else if(step == 3 && data == 'red'){ // start GAME.
+			}else if(step == 3 && data == 'r_released'){ // start GAME.
 
-				$('#play_level_'+cur_lv).show();
+				$('#play_level_'+2).show();
 
+				// var startTime = (new Date()).getTime();
+    //     		countingDown(countingDownCanvas, ctx0, startTime);
 
 				transition_03();
 
 			}else if(step ==4 && data){
-				interaction_04("button", data);
+
+				
+				if(data == 'red'){
+					$('#active_slot').css({
+						'background':'-webkit-linear-gradient(rgba(0,0,0,0.3),rgba(255,23,107,1))',
+						'opacity':'1'
+					});
+
+					$('#slotBox_0'+curValue).css({
+						'background-color': '#FF1768'
+					});
+
+
+					if(curValue == 1 || curValue ==3 ){
+						if($('#'+curValue+'_n0').offset().top > 0 && $('#'+curValue+'_n0').offset().top < 1100){
+							$('#'+curValue+'_n0').css({
+								'display':'none'
+							});
+							score+= 100; 
+						}
+						if($('#'+curValue+'_n1').offset().top > 0 && $('#'+curValue+'_n1').offset().top < 1100){
+							$('#'+curValue+'_n1').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n2').offset().top > 0 && $('#'+curValue+'_n2').offset().top < 1100){
+							$('#'+curValue+'_n2').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+					}else if(curValue == 2 || curValue ==4 ){
+						if($('#'+curValue+'_n0').offset().top > 0 && $('#'+curValue+'_n0').offset().top < 1100){
+							$('#'+curValue+'_n0').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n1').offset().top > 0 && $('#'+curValue+'_n1').offset().top < 1100){
+							$('#'+curValue+'_n1').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+					}
+
+					$('.t_score').html(score);
+					console.log(score);
+					//color = '#FF1768';
+				}else if(data == 'blue'){
+					$('#active_slot').css({
+						'background':'-webkit-linear-gradient(rgba(0,0,0,0.3),rgba(26,130,255,1))',
+						'opacity':'1'
+					});
+
+					$('#slotBox_0'+curValue).css({
+						'background-color': '#1A82FF'
+					});
+
+
+					if(curValue == 1 || curValue ==3 ){
+						if($('#'+curValue+'_n3').offset().top > 0 && $('#'+curValue+'_n3').offset().top < 1100){
+							$('#'+curValue+'_n3').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n4').offset().top > 0 && $('#'+curValue+'_n4').offset().top < 1100){
+							$('#'+curValue+'_n4').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+					
+					}else if(curValue == 2 || curValue ==4 ){
+						if($('#'+curValue+'_n2').offset().top > 0 && $('#'+curValue+'_n2').offset().top < 1100){
+							$('#'+curValue+'_n2').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n3').offset().top > 0 && $('#'+curValue+'_n3').offset().top < 1100){
+							$('#'+curValue+'_n3').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n4').offset().top > 0 && $('#'+curValue+'_n4').offset().top < 1100){
+							$('#'+curValue+'_n4').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+					}
+
+					$('.t_score').html(score);
+					console.log(score);
+					//color = '#FFDE1D';
+				}else if(data == 'yellow'){
+					$('#active_slot').css({
+						'background':'-webkit-linear-gradient(rgba(0,0,0,0.3),rgba(255,222,29,1))',
+						'opacity':'1'
+					});
+
+					$('#slotBox_0'+curValue).css({
+						'background-color': '#FFDE1D'
+					});
+
+					if(curValue == 1 || curValue ==3 ){
+						if($('#'+curValue+'_n5').offset().top > 0 && $('#'+curValue+'_n5').offset().top < 1100){
+							$('#'+curValue+'_n5').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n6').offset().top > 0 && $('#'+curValue+'_n6').offset().top < 1100){
+							$('#'+curValue+'_n6').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+					
+					}else if(curValue == 2 || curValue ==4 ){
+						if($('#'+curValue+'_n5').offset().top > 0 && $('#'+curValue+'_n5').offset().top < 1100){
+							$('#'+curValue+'_n5').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n6').offset().top > 0 && $('#'+curValue+'_n6').offset().top < 1100){
+							$('#'+curValue+'_n6').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n7').offset().top > 0 && $('#'+curValue+'_n7').offset().top < 1100){
+							$('#'+curValue+'_n7').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+					}
+
+					$('.t_score').html(score);
+					console.log(score);
+					//color = '#21ED79';				
+				}else if(data == 'green'){
+					$('#active_slot').css({
+						'background':'-webkit-linear-gradient(rgba(0,0,0,0.3),rgba(33,237,121,1))',
+						'opacity':'1'
+					});
+
+					$('#slotBox_0'+curValue).css({
+						'background-color': '#21ED79'
+					});
+
+					if(curValue == 1 || curValue ==3 ){
+						if($('#'+curValue+'_n7').offset().top > 0 && $('#'+curValue+'_n7').offset().top < 1100){
+							$('#'+curValue+'_n7').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n8').offset().top > 0 && $('#'+curValue+'_n8').offset().top < 1100){
+							$('#'+curValue+'_n8').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n9').offset().top > 0 && $('#'+curValue+'_n9').offset().top < 1100){
+							$('#'+curValue+'_n9').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+					
+					}else if(curValue == 2 || curValue ==4 ){
+						
+						if($('#'+curValue+'_n8').offset().top > 0 && $('#'+curValue+'_n8').offset().top < 1100){
+							$('#'+curValue+'_n8').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n9').offset().top > 0 && $('#'+curValue+'_n9').offset().top < 1100){
+							$('#'+curValue+'_n9').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+					}
+
+					$('.t_score').html(score);
+					console.log(score);
+					//color = '#1A82FF';
+
+				}
+
 			}
 
 
+			if(data == 'r_released' || data =='y_released' || data == 'g_released' || data == 'b_released'){
+				$('#active_slot').css({
+					// 'background-color':'rgba(255,255,255,0.3)',
+					'background': '-webkit-linear-gradient(rgba(0,0,0,0.8), white)',
+					'opacity':'.5'
+				});
 
+				$('.slot_color_box').css({
+						'background-color': '#FFE2F7'
+					});
+			}
 
 	});	
+
+	
 
 
 /********************************************************
@@ -237,6 +536,8 @@ function transition_03(){
 				$('#game_view').removeClass();
 		    	$('#game_view').show().addClass('animated fadeIn');
 		    	step = 4;
+		    	$('.back_music').html("<embed name=\"back_music0\" src=\"sounds/BGM/Crazy_Eurythmics - Sweet Dreams.wav\" loop=\"false\" hidden=\"true\" autostart=\"true\">");
+		    	game_1(3000);
 	    	},30);
 		},250);
 }
@@ -351,26 +652,6 @@ function interaction_03(level){
 function interaction_04(C_B, data){
 
 
-	if(C_B == "button"){
-		if(data == 'red'){
-			$('#slotBox_01').css({
-				'background-color': '#FF1768'
-			});
-		}else{
-			$('#slotBox_01').css({
-				'background-color': '#FFE2F7'
-			});
-		}
-		
-		if(data == 'blue'){
-
-		}else if(data == 'yellow'){
-
-		}else if(data == 'green'){
-
-		}
-	}
-
 }
 
 if(step ==4){
@@ -389,434 +670,55 @@ if(step ==4){
 	step =1;
 }
 
+function random_creator(){
+	var select = (int)(Math.random()*10);
+	if(select == 0){
+		select += 1;
+	}
+
+	return select;
+}
 
 /********************************************************
 			GENERAL INTERACTION ELEMENTS
 ********************************************************/
+
+function game_1(start_time){
+
+	var time = parseInt(start_time);
+
+
+		var i = (parseInt(Math.random()*10)%4)+1;
+		var p = parseInt(Math.random() * 10);
+
+	setTimeout(function(){
+		$('#'+i+'_n'+p).animate({
+			'top':'110%'
+		},5000);
+	},time+ 50);
+
+	setTimeout(function(){
+		$('#'+i+'_n'+p).css({
+			'top':'-10%'
+		});
+	},time + 100);
+
+	setTimeout(function(){
+
+	time += (Math.random()*5000);
+
+	return game_1(time);
+
+	}, time + 100);
+
+}
+
 
 
 
 
 
 }); //document ready/
-
-
-
-</script>
-
-<script>
-
-var canvas = document.getElementById("awesomeCanvas");
-var countingDownCanvas = document.getElementById("countingDownCanvas");
-var ctx = canvas.getContext("2d");
-var ctx0 = countingDownCanvas.getContext("2d");
-var canvasWidth = canvas.width;
-var canvasHeight = canvas.height;
-var color = '#FFFFFF';
-var ballColor;
-var ballSize = 26;
-var s = 0;
-var score = 0;
-var start = false;
-var prevValue;
-var currentValue;
-var comboState = 0;
-
-var numberOfBalls = 77;
-
-window.requestAnimFrame = (function(callback) {
-    return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
-    function(callback) {
-      window.setTimeout(callback, 1000 / 60);
-    };
-  })();
-
-function countingDown(canvas, context, startTime){
-var time = (new Date()).getTime() - startTime;
-console.log(time);
-if(time >= 0 && time <1000){
-	$('.msg').text(" 3 ");
-	$('.msg').css("color", "blue");
-// clear
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-
-    // request new frame
-    requestAnimFrame(function() {
-      countingDown(countingDownCanvas, ctx0, startTime);
-    });
-    console.log("one");
-}else if(time >= 1000 && time <2000){
-	$('.msg').text(" 2 ");
-	$('.msg').css("color", "green");
-
-// clear
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-
-    // request new frame
-    requestAnimFrame(function() {
-      countingDown(countingDownCanvas, ctx0, startTime);
-    });
-    console.log("two");
-}else if(time >= 2000 && time <3000){
-	$('.msg').text(" 1 ");
-	$('.msg').css("color", "yellow");
-
-// clear
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-
-    // request new frame
-    requestAnimFrame(function() {
-      countingDown(countingDownCanvas, ctx0, startTime);
-    });
-    console.log("three");
-}else if(time >= 3000 && time <4000){
-	$('.msg').css("font-size", "130px");
-	$('.msg').css("color", "red");
-	$('.msg').text(" START! ");
-
-// clear
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-
-    // request new frame
-    requestAnimFrame(function() {
-      countingDown(countingDownCanvas, ctx0, startTime);
-    });
-    console.log("starting");
-
-    
-      
-}else if(time >= 4000){
-	$('.msg').text("");
-
-// clear
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-	// request new frame
-        animate(playerBar, balls, canvas, ctx, startTime);
-}
-
-}
-
-    		
-function animate(playerBar, balls, canvas, context, startTime) {
-    
-    // update
-    var time = (new Date()).getTime() - startTime;
-
-    var gravity = 100;
-
-    for(var i =0; i < numberOfBalls; i++){
-    	balls[i].y = balls[i].y + 0.05 * gravity;
-
-	}
-
-	if(playerBar.x + playerBar.width >= canvasWidth){
-		playerBar.x = canvasWidth - playerBar.width;
-	}else if(playerBar.x  <= 0){
-		playerBar.x = 0;
-	}
-
-
-	if(currentValue >= 0){
-		if(prevValue != currentValue){
-				if(prevValue < currentValue && playerBar.x <= canvasWidth - playerBar.width){
-					playerBar.x += Math.abs(currentValue - prevValue) *5;
-					$(function(){
-			// $('embed').remove();
-			// $('body').append('<embed src=\"scratch01.wav\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
-		});
-
-				}else if(prevValue > currentValue && playerBar.x >= 0){
-					playerBar.x -= Math.abs(currentValue - prevValue) *5;
-					$(function(){
-			// $('embed').remove();
-			// $('body').append('<embed src=\"scratch02.wav\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
-		});
-				}
-
-				prevValue = currentValue;
-
-		}
-	}else if(currentValue <0){
-		if(prevValue != currentValue){
-				if(prevValue < currentValue && playerBar.x <= canvasWidth - playerBar.width){
-					playerBar.x -= Math.abs(currentValue - prevValue) *5;
-					$(function(){
-			// $('embed').remove();
-			// $('body').append('<embed src=\"scratch03.wav\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
-		});
-
-				}else if(prevValue > currentValue && playerBar.x >= 0){
-					playerBar.x += Math.abs(currentValue - prevValue) *5;
-					$(function(){
-			// $('embed').remove();
-			// $('body').append('<embed src=\"scratch04.wav\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
-		});
-
-				}
-
-				prevValue = currentValue;
-
-		}
-	}
-
-
-	
-
-    for(var i =0; i < numberOfBalls; i++){
-    	if(balls[i].color == color && balls[i].x >= playerBar.x -3 && balls[i].x + 30 <= playerBar.x + playerBar.width + 3 && balls[i].y >= 50 && balls[i].color != 'white'){
-    		balls[i].x = 5000;
-    		s++;
-    		state = 1;
-    		
-    		time4msg = (new Date()).getTime();			        
-    		score += s*100;	
-    		comboState ++;
-    		$('.comboMsg').css("color", "orange");
-    		$('.comboMsg').text("Combo "+ comboState);		
-
-    	}else if(balls[i].color == 'white' && balls[i].x >= playerBar.x -3 && balls[i].x + 30 <= playerBar.x + playerBar.width + 3 && balls[i].y >= 50 && color != '#FFFFFF'){
-    		console.log(color);
-    		balls[i].x = 5000;
-    		s= s+0.5;
-    		state = 1;
-    		time4msg = (new Date()).getTime();			        
-    		score += s*50;	
-    		comboState++;
-    		$('.comboMsg').css("color", "orange");	
-    		$('.comboMsg').text("Combo "+ comboState);		
-
-    	}else if(balls[i].x >= 0 && balls[i].x <= canvasWidth && balls[i].y > canvasHeight){
-    		balls[i].x = 5000;
-    		s--;
-    		state = 0;
-    		time4msg = (new Date()).getTime();
-    		comboState = 0;
-    		$('.comboMsg').text("");
-    	}
-
-    	score = s * 100;
-    	$('.score').text("SCORE : " + score);
-
-
-     }
-
-     console.log(comboState);
-
-     if(comboState == 3){
-     	console.log(" 3 combo!");
-     	score = score + 1000;
-     	$('.comboMsg').text("Combo bonus +1000 !");
-     	$('.score').text("SCORE : " + score);
-
-     }else if(comboState == 6){
-     	console.log(" 6 combo!");
-     	score = score + 2000;
-     	$('.comboMsg').text("Combo bonus +2000 !");
-     	$('.score').text("SCORE : " + score);
-
-     }else if(comboState == 10 ){
-     	console.log(" 10 combo!");
-     	score = score + 5000;
-     	$('.comboMsg').text("Combo bonus +5000 !");
-     	$('.score').text("SCORE : " + score);
-
-     }else{
-     	$('.comboMsg').text("");
-     }
-
-     var countingBalls=0;
-    for(var i =0; i < numberOfBalls; i++){
-    	if(balls[i].y > canvasHeight){
-    		countingBalls++;
-    	}
-    }
-
-    if(countingBalls == numberOfBalls){
-    	$('.msg').text(" W I N ");
-    	$('.result').text(" Your score is " + score);
-    	$('.info').text("Refresh to play again!");
-    	 $('embed').remove();
-			 $('body').append('<embed src=\"scratch02.wav\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
-    	//$(this).clear();
-    	// $(body).append("<p id=\"playAgainButton\"><input type=\"image\" src=\"buttonIMG.gif\" onclick=\"playAgain()\">");				    	
-    }
-
-    if(score < -500){
-    	$('.msg').text(" L O S E ");
-    	$('.result').text(" Your score is " + score);
-    	$('.info').text("Refresh to play again!");
-    	 $('embed').remove();
-			 $('body').append('<embed src=\"scratch03.wav\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
-    	$(this).clear();
-    	$(body).append("<p id=\"playAgainButton\"><input type=\"image\" src=\"buttonIMG.gif\" onclick=\"playAgain()\">");	
-    }
-
-
-
-    
-
-    // if(((new Date()).getTime() - time4msg) < 1 && state ==1){
-    // 	$('.msg').text(" Excellent ! ");
-    // }else if(((new Date()).getTime() - time4msg) < 1 && state ==0){
-    // 	$('.msg').text(" Missed ! ");
-    // } 
-
-    // console.log(((new Date()).getTime());
-
-
-
-    // clear
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-    drawPlayerBar(playerBar, ctx);
-
-    for(var i =0; i < numberOfBalls; i++)
-    	drawBalls(balls[i], ctx);
-
-
-    // request new frame
-    requestAnimFrame(function() {
-      animate(playerBar, balls, canvas, context, startTime);
-    });
-}
-
-
-function playAgain(){
-$('#playAgainButton').remove();
-s = 0;
-score = 0;
-prevValue = 0;
-currentValue = 0;
-comboState = 0
- setTimeout(function() {
-        var startTime = (new Date()).getTime();
-        countingDown(countingDownCanvas, ctx0, startTime);
-      }, 0);   	
-}
-
-var playerBar = {
-x: canvasWidth/2 - 50,
-y: canvasHeight - 20,
-opacity : 0.1,
-width: 100,
-height: 50
-};
-
-var balls = new Array(numberOfBalls);
-
-for(var i = 0; i < numberOfBalls; i++){
-var randomMaker = Math.random() * 10;
-
-	if(randomMaker >=  0 && randomMaker < 2){
-		ballColor ='white';
-	}else if(randomMaker >=  2 && randomMaker < 4){
-		ballColor ='red';
-	}else if(randomMaker >=  4 && randomMaker < 6){
-		ballColor ='yellow';
-	}else if(randomMaker >=  6 && randomMaker < 8){
-		ballColor ='green';
-	}else if(randomMaker >=  8 && randomMaker < 10){
-		ballColor ='blue';
-	}
-
-balls[i] = {
-	x: Math.random()*canvasWidth,
-	y: Math.random() * canvasHeight * i* -0.3,
-	opacity: 0.1,
-	color: ballColor
-
-};
-}
-function drawPlayerBar(playerBar, context){
-context.beginPath();
-context.rect(playerBar.x, playerBar.y, playerBar.width, playerBar.height);
-context.fillStyle = color;
-context.fill();
-
-if(start){
-    context.rect(playerBar.x, 0, playerBar.width, canvasWidth);
-
-    // add linear gradient
-    var grd = context.createLinearGradient(0, 0, 0, canvas.height);
-    grd.addColorStop(0, '#252525');  
-    grd.addColorStop(1, color);
-    context.fillStyle = grd;
-    context.fill();
-}
-}
-
-
-
-
-function drawBalls(ball, context){
-context.beginPath();
-context.arc(ball.x, ball.y, ballSize, 0, 2 * Math.PI, false);
-context.fillStyle = ball.color;
-context.fill();
-}
-
-socket.on('controller', function(data) {
-	
-	currentValue = data;		
-	
-});
-
-
-
-socket.on('button', function(data) {
-
-
-if(data == 25956){
-		color = 'red';
-		// $(function(){
-		// 	$('embed').remove();
-		// 	$('body').append('<embed src=\"beat01.wav\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
-		// });
-	}else if(data == 28535){
-		color = 'yellow';
-		// $(function(){
-		// 	$('embed').remove();
-		// 	$('body').append('<embed src=\"beat02.wav\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
-		// });
-	}else if(data == 25966){
-		color = 'green';
-		// $(function(){
-		// 	$('embed').remove();
-		// 	$('body').append('<embed src=\"beat03.wav\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
-		// });					
-	}else if(data == 30053){
-		color = 'blue';
-		// $(function(){
-		// 	$('embed').remove();
-		// 	$('body').append('<embed src=\"beat04.aif\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
-		// });
-
-	}else if(data == 28261){
-		color = 'white';
-		// $(function(){
-		// 	$('embed').remove();
-		// 	$('body').append('<embed src=\"beat04.aif\" autostart=\"true\" hidden=\"true\" loop=\"false\">');
-		// });
-
-	}
-
-	start = true;			
-
-});
-
-
-
-// wait one second before starting animation
-setTimeout(function() {
-        var startTime = (new Date()).getTime();
-        countingDown(countingDownCanvas, ctx0, startTime);
-      }, 0);
-    //});
 
 </script>
 
@@ -936,10 +838,12 @@ setTimeout(function() {
 
 		<p class="msg"></p>
 
+		<div class="back_music"></div>
+
 		<div class="game_structure">
 			<div class="score_container">
 				<p class="score_text">SCORE</p>
-				<p class="score">0</p>
+				<p class="t_score">0</p>
 			</div>
 			<!-- <div class="rank_container">
 				<p class="rank_text">RANKING BEST</p>
@@ -956,7 +860,7 @@ setTimeout(function() {
 				<p class="artist">EURYTHMICS</p>
 				</div>
 			</div>
-
+<!-- 
 			<div class="time_combo_info">
 				<div class="time_container">
 					<p class="time_text">TIME</p>
@@ -980,7 +884,7 @@ setTimeout(function() {
 						<img id="bonus_05" class="bonus_stage" src="img/GAME/COMBO/BONUS_5000.png" style="display:none">
 					</div>
 				</div>
-			</div> 
+			</div>  -->
 
 			<div class="action" style="display:none">
 				<div class="combo_action">
@@ -993,22 +897,88 @@ setTimeout(function() {
 
 		<!-- real game interactive area. balls fall down and shoot by turuing turntable -->
 		<div class="game_area">
+			<div id ="active_slot"></div>
 			<div id="slot_01" class="slot">
-				<img id="n1" class="game_note" src="img/GAME/GAME_music/red_94.png">
+				<img id="n_optional" class="game_note" src="img/GAME/GAME_music/red_94.png">
 				<div id="slotBox_back_01" class="slot_box_background"></div>
 				<div id="slotBox_01" class="slot_color_box"><img class="game_box_note" src="img/NOTE_IMG/music_white_inner.png"></div>
+
+				<img id="1_n0" class="game_note" src="img/GAME/GAME_music/red_94.png">
+				<img id="1_n1" class="game_note" src="img/GAME/GAME_music/red_94.png">
+				<img id="1_n2" class="game_note" src="img/GAME/GAME_music/red_94.png">
+
+				<img id="1_n3" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+				<img id="1_n4" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+
+				<img id="1_n5" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+				<img id="1_n6" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+
+				<img id="1_n7" class="game_note" src="img/GAME/GAME_music/green_94.png">
+				<img id="1_n8" class="game_note" src="img/GAME/GAME_music/green_94.png">
+				<img id="1_n9" class="game_note" src="img/GAME/GAME_music/green_94.png">
+
+
+				<!-- position setting to over the game scene. and wait for its order/time -->
+
+
+
 			</div>
 			<div id="slot_02" class="slot">
 				<div id="slotBox_back_02" class="slot_box_background"></div>
 				<div id="slotBox_02" class="slot_color_box"><img class="game_box_note" src="img/NOTE_IMG/music_white_inner.png"></div>
+
+				<img id="2_n0" class="game_note" src="img/GAME/GAME_music/red_94.png">
+				<img id="2_n1" class="game_note" src="img/GAME/GAME_music/red_94.png">
+				<img id="2_n2" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+
+				<img id="2_n3" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+				<img id="2_n4" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+
+				<img id="2_n5" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+				<img id="2_n6" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+
+				<img id="2_n7" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+				<img id="2_n8" class="game_note" src="img/GAME/GAME_music/green_94.png">
+				<img id="2_n9" class="game_note" src="img/GAME/GAME_music/green_94.png">
+
 			</div>
 			<div id="slot_03" class="slot">
 				<div id="slotBox_back_03" class="slot_box_background"></div>
 				<div id="slotBox_03" class="slot_color_box"><img class="game_box_note" src="img/NOTE_IMG/music_white_inner.png"></div>
+
+				<img id="3_n0" class="game_note" src="img/GAME/GAME_music/red_94.png">
+				<img id="3_n1" class="game_note" src="img/GAME/GAME_music/red_94.png">
+				<img id="3_n2" class="game_note" src="img/GAME/GAME_music/red_94.png">
+
+				<img id="3_n3" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+				<img id="3_n4" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+
+				<img id="3_n5" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+				<img id="3_n6" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+
+				<img id="3_n7" class="game_note" src="img/GAME/GAME_music/green_94.png">
+				<img id="3_n8" class="game_note" src="img/GAME/GAME_music/green_94.png">
+				<img id="3_n9" class="game_note" src="img/GAME/GAME_music/green_94.png">
+
 			</div>
 			<div id="slot_04" class="slot">
 				<div id="slotBox_back_04" class="slot_box_background"></div>
 				<div id="slotBox_04" class="slot_color_box"><img class="game_box_note" src="img/NOTE_IMG/music_white_inner.png"></div>
+
+				<img id="4_n0" class="game_note" src="img/GAME/GAME_music/red_94.png">
+				<img id="4_n1" class="game_note" src="img/GAME/GAME_music/red_94.png">
+				<img id="4_n2" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+
+				<img id="4_n3" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+				<img id="4_n4" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+
+				<img id="4_n5" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+				<img id="4_n6" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+
+				<img id="4_n7" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+				<img id="4_n8" class="game_note" src="img/GAME/GAME_music/green_94.png">
+				<img id="4_n9" class="game_note" src="img/GAME/GAME_music/green_94.png">
+
 			</div>
 		</div>
 

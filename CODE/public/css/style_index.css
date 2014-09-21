@@ -461,7 +461,7 @@ p.score_text{
 	font-style: italic;
 }
 
-p.score{
+p.t_score{
 	position:relative;
 	top:3%;
 	color:white;
@@ -722,6 +722,16 @@ p.combo_text{
 	text-align: center;
 }
 
+#active_slot{
+	position:absolute;
+	top:0;
+	left:0;
+	width:25%;
+	height:100%;
+	z-index:1;
+	background-color: white;
+}
+
 
 #slot_01{left:0%;}
 #slot_02{left:25%;}
@@ -736,7 +746,7 @@ p.combo_text{
 	bottom:1%;
 	background-color: #FFE2F7; /*#FFE2F7;FF1768*/
 	opacity:.65;
-	z-index:1;
+	z-index:2;
 	box-shadow: inset 0px 0px 70px rgba(100,100,100,0.4);
 }
 
@@ -748,7 +758,7 @@ p.combo_text{
 	bottom:1%;
 	background-color: #FFE2F7;
 	opacity:1;
-	z-index:0;
+	z-index:1;
 }
 
 .game_box_note{
@@ -759,12 +769,23 @@ p.combo_text{
 	margin-left:-39.5px;
 	top:50%;
 	left:50%;
-	z-index: 2;
+	z-index: 3;
 	opacity:.58;
 }
 
-
 .game_note{
+	position:absolute;
+	width:79px;
+	height:62px;
+	top:-10%;
+	margin-left:-39.5px;
+	margin-top:-31px;
+	z-index: 2;
+	opacity:1;
+}
+
+
+/*.game_note{
 	position:relative;
 	width:79px;
 	height:62px;
@@ -772,7 +793,7 @@ p.combo_text{
 	margin: 0 auto;
 	z-index: 2;
 	opacity:1;
-}
+}*/
 
 
 #result_view{
@@ -934,20 +955,28 @@ p.combo_text{
 
 #countingDownCanvas{
 	position:absolute;
-	width:100%;
+	width:60%;
 	height:100%;
 	top:0;
-	left:0;
+	left:20%;
+	text-align: center;
 }
 
 #awesomeCanvas{
 	position:absolute;
-	width:100%;
+	width:60%;
 	height:100%;
 	top:0;
-	left:0;
+	left:20%;
+	text-align: center;
 }
 
-
+.msg{
+	position:relative;
+	margin: 0 auto;
+	font-size: 20px;
+	font-weight: 700;
+	z-index:50;
+}
 
 			
