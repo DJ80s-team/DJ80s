@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html>
+<head>
+		
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<link rel="stylesheet"  type="text/css" href="css/animate.css" />
+<link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:300italic,400italic,700italic,400,700,300' rel='stylesheet' type='text/css'>
+
+<link rel="stylesheet"  type="text/css" href="css/style_index.css" />
+<script src="http://localhost:9001/socket.io/socket.io.js"></script>
+
+<script>
+
+$(document).ready(function(){
+
+/************************  
+*	step 0 : intro; 	*
+*	step 1: loading;	*
+*	step 2: level; 		*
+*	step 3: music; 		*
+*	step 4: game; 		*
+*	step 5: grade 		*
+*************************/
+
+var canvas = document.getElementById("awesomeCanvas");
+var countingDownCanvas = document.getElementById("countingDownCanvas");
+var ctx = canvas.getContext("2d");
+var ctx0 = countingDownCanvas.getContext("2d");
+var canvasWidth = canvas.width;
+var canvasHeight = canvas.height;
+var color = '#FFFFFF';
+var ballColor;
+var ballSize = 5;
+var s = 0;
+var score = 0;
+var start = false;
+var prevValue = 0;
+var currentValue;
+var comboState = 0;
+
+var numberOfBalls = 10;
+
+var step = 4;  
+var m_number = 1;
+var selected_level = 'n';
+var stage = 'h';
+var prev_lv = 0;
+var cur_lv = 0;
+var selected_song = "";
+var selected_artist = "";
+var highest_score = 0;
+var curValue = 1;
+var score=0;
+
+
+
+
+
+var socket = io.connect('http://localhost:9001');
+			
+	socket.on('controller', function(data) {
+			currentValue = data;	
+
+			if(step == 2 && data == 'right'){
+				interaction_02(true);
+			}else if(step == 2 && data == 'left'){
+				interaction_02(false);
+			}else if(step ==3 && data){
+				interaction_03(cur_lv);
+			}else if(step ==4 && data){
+				interaction_04("controller", data);	
+				if(data == "right"){
+					if(prevValue == 0){
+						prevValue++;
+						// playerBar.x = (canvasWidth/4 * prevValue) + 3;
+
+						$('#active_slot').css({
+							'left':'25%',
+						});		
+						curValue = 2;
+					}else if(prevValue == 1){
+							prevValue++;
+						//playerBar.x = (canvasWidth/4 * prevValue) + 3;
+						$('#active_slot').css({
+							'left':'50%',
+						});	
+						curValue = 3;
+					}else if(prevValue == 2){
+							prevValue++;
+						//playerBar.x = (canvasWidth/4 * prevValue) + 3;
+						$('#active_slot').css({
+							'left':'75%',
+						});
+						curValue = 4;
+					}else if(prevValue == 3){
+						//playerBar.x = (canvasWidth/4 * prevValue) + 3;
+						// $('#active_slot').css({
+						// 	'left':'0%',
+						// });
+						curValue = 4;
+					}
+
+
+				}else if(data == "left"){
+
+					if(prevValue == 0){
+						//prevValue=3;
+						//playerBar.x = (canvasWidth/4 * prevValue) + 3;
+						// $('#active_slot').css({
+						// 	'left':'75%',
+						// });	
+						curValue = 1;
+					}else if(prevValue == 1){
+							prevValue--;
+						//playerBar.x = (canvasWidth/4 * prevValue) + 3;
+						$('#active_slot').css({
+							'left':'0%',
+						});
+						curValue = 1;
+					}else if(prevValue == 2){
+							prevValue--;
+						//playerBar.x = (canvasWidth/4 * prevValue) + 3;
+						$('#active_slot').css({
+							'left':'25%',
+						});
+						curValue = 2;
+					}else if(prevValue == 3){
+							prevValue--;
+						//playerBar.x = (canvasWidth/4 * prevValue) + 3;
+						$('#active_slot').css({
+							'left':'50%',
+						});	
+						curValue = 3;
+					}
+				}
+				console.log(curValue);
+
+			}
+
+				
+
+	});
+
+	socket.on('button', function(data) {
+
+
+	start = true;	
+		
+			if(step == 0 && data == 'r_released'){
+				transition_00();
+			}else if(step ==0 && data == 'b_released'){}
+
+			if(step == 2 && data == 'r_released'){
+
+				if (cur_lv == 0){
+					$('.m_easy').show();
+				}else if(cur_lv ==1){
+					$('.m_hard').show();
+				}else if(cur_lv ==2){
+					$('.m_crazy').show();
+				}else if(cur_lv ==3){
+					$('.m_normal').show();
+				}
+
+				transition_02();
+
+			}else if(step ==2 && data == 'b_released'){
+
+				transition_back_00();
+			}
+
+			if(step ==3 && data == 'b_released'){
+
+				transition_back_02();
+				
+				if (cur_lv == 0){
+					setTimeout(function(){
+						$('.m_easy').css({'display':'none'});
+					},550);
+				}else if(cur_lv ==1){
+					setTimeout(function(){
+						$('.m_hard').css({'display':'none'});
+					},550);
+				}else if(cur_lv ==2){
+					setTimeout(function(){
+						$('.m_crazy').css({'display':'none'});
+					},550);
+				}else if(cur_lv ==3){
+					setTimeout(function(){
+						$('.m_normal').css({'display':'none'});
+					},550);
+				}
+
+				
+			}else if(step == 3 && data == 'r_released'){ // start GAME.
+
+				$('#play_level_'+2).show();
+
+				// var startTime = (new Date()).getTime();
+    //     		countingDown(countingDownCanvas, ctx0, startTime);
+
+				transition_03();
+
+			}else if(step ==4 && data){
+
+				
+				if(data == 'red'){
+					$('#active_slot').css({
+						'background':'-webkit-linear-gradient(rgba(0,0,0,0.3),rgba(255,23,107,1))',
+						'opacity':'1'
+					});
+
+					$('#slotBox_0'+curValue).css({
+						'background-color': '#FF1768'
+					});
+
+
+					if(curValue == 1 || curValue ==3 ){
+						if($('#'+curValue+'_n0').offset().top > 0 && $('#'+curValue+'_n0').offset().top < 1100){
+							$('#'+curValue+'_n0').css({
+								'display':'none'
+							});
+							score+= 100; 
+						}
+						if($('#'+curValue+'_n1').offset().top > 0 && $('#'+curValue+'_n1').offset().top < 1100){
+							$('#'+curValue+'_n1').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n2').offset().top > 0 && $('#'+curValue+'_n2').offset().top < 1100){
+							$('#'+curValue+'_n2').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+					}else if(curValue == 2 || curValue ==4 ){
+						if($('#'+curValue+'_n0').offset().top > 0 && $('#'+curValue+'_n0').offset().top < 1100){
+							$('#'+curValue+'_n0').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n1').offset().top > 0 && $('#'+curValue+'_n1').offset().top < 1100){
+							$('#'+curValue+'_n1').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+					}
+
+					$('.t_score').html(score);
+					console.log(score);
+					//color = '#FF1768';
+				}else if(data == 'blue'){
+					$('#active_slot').css({
+						'background':'-webkit-linear-gradient(rgba(0,0,0,0.3),rgba(26,130,255,1))',
+						'opacity':'1'
+					});
+
+					$('#slotBox_0'+curValue).css({
+						'background-color': '#1A82FF'
+					});
+
+
+					if(curValue == 1 || curValue ==3 ){
+						if($('#'+curValue+'_n3').offset().top > 0 && $('#'+curValue+'_n3').offset().top < 1100){
+							$('#'+curValue+'_n3').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n4').offset().top > 0 && $('#'+curValue+'_n4').offset().top < 1100){
+							$('#'+curValue+'_n4').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+					
+					}else if(curValue == 2 || curValue ==4 ){
+						if($('#'+curValue+'_n2').offset().top > 0 && $('#'+curValue+'_n2').offset().top < 1100){
+							$('#'+curValue+'_n2').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n3').offset().top > 0 && $('#'+curValue+'_n3').offset().top < 1100){
+							$('#'+curValue+'_n3').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n4').offset().top > 0 && $('#'+curValue+'_n4').offset().top < 1100){
+							$('#'+curValue+'_n4').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+					}
+
+					$('.t_score').html(score);
+					console.log(score);
+					//color = '#FFDE1D';
+				}else if(data == 'yellow'){
+					$('#active_slot').css({
+						'background':'-webkit-linear-gradient(rgba(0,0,0,0.3),rgba(255,222,29,1))',
+						'opacity':'1'
+					});
+
+					$('#slotBox_0'+curValue).css({
+						'background-color': '#FFDE1D'
+					});
+
+					if(curValue == 1 || curValue ==3 ){
+						if($('#'+curValue+'_n5').offset().top > 0 && $('#'+curValue+'_n5').offset().top < 1100){
+							$('#'+curValue+'_n5').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n6').offset().top > 0 && $('#'+curValue+'_n6').offset().top < 1100){
+							$('#'+curValue+'_n6').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+					
+					}else if(curValue == 2 || curValue ==4 ){
+						if($('#'+curValue+'_n5').offset().top > 0 && $('#'+curValue+'_n5').offset().top < 1100){
+							$('#'+curValue+'_n5').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n6').offset().top > 0 && $('#'+curValue+'_n6').offset().top < 1100){
+							$('#'+curValue+'_n6').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n7').offset().top > 0 && $('#'+curValue+'_n7').offset().top < 1100){
+							$('#'+curValue+'_n7').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+					}
+
+					$('.t_score').html(score);
+					console.log(score);
+					//color = '#21ED79';				
+				}else if(data == 'green'){
+					$('#active_slot').css({
+						'background':'-webkit-linear-gradient(rgba(0,0,0,0.3),rgba(33,237,121,1))',
+						'opacity':'1'
+					});
+
+					$('#slotBox_0'+curValue).css({
+						'background-color': '#21ED79'
+					});
+
+					if(curValue == 1 || curValue ==3 ){
+						if($('#'+curValue+'_n7').offset().top > 0 && $('#'+curValue+'_n7').offset().top < 1100){
+							$('#'+curValue+'_n7').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n8').offset().top > 0 && $('#'+curValue+'_n8').offset().top < 1100){
+							$('#'+curValue+'_n8').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n9').offset().top > 0 && $('#'+curValue+'_n9').offset().top < 1100){
+							$('#'+curValue+'_n9').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+					
+					}else if(curValue == 2 || curValue ==4 ){
+						
+						if($('#'+curValue+'_n8').offset().top > 0 && $('#'+curValue+'_n8').offset().top < 1100){
+							$('#'+curValue+'_n8').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+						if($('#'+curValue+'_n9').offset().top > 0 && $('#'+curValue+'_n9').offset().top < 1100){
+							$('#'+curValue+'_n9').css({
+								'display':'none'
+							});
+							score+= 100;
+						}
+					}
+
+					$('.t_score').html(score);
+					console.log(score);
+					//color = '#1A82FF';
+
+				}
+
+			}
+
+
+			if(data == 'r_released' || data =='y_released' || data == 'g_released' || data == 'b_released'){
+				$('#active_slot').css({
+					// 'background-color':'rgba(255,255,255,0.3)',
+					'background': '-webkit-linear-gradient(rgba(0,0,0,0.8), white)',
+					'opacity':'.5'
+				});
+
+				$('.slot_color_box').css({
+						'background-color': '#FFE2F7'
+					});
+			}
+
+	});	
+
+	
+
+
+/********************************************************
+		STEP 0~1 :: LOADING - INTERACTION
+********************************************************/
+
+function transition_00(){ // STEP 1's transition
+
+	$('#logo_view').removeClass();
+	$('#logo_view').addClass('animated fadeOut');
+		setTimeout(function(){
+			$('#level_view').removeClass();
+	    	$('#level_view').show().addClass('animated bounceInUp');
+	    	step = 2;
+		},450);
+
+	
+}
+
+function transition_back_00(){
+	$('#level_view').removeClass();
+	$('#level_view').addClass('animated bounceOutDown');
+	// $('.level_view').css({
+	// 	'display' : 'none'
+	// });
+
+		setTimeout(function(){
+			$('#logo_view').removeClass();
+	    	$('#logo_view').addClass('animated bounceInDown');
+	    	step = 0;
+		},250);
+}
+
+
+/********************************************************
+		STEP 2 :: LEVEL SELECTION - INTERACTION
+********************************************************/
+	
+function transition_02(){  // 
+
+	$('#level_view').removeClass();
+	
+		setTimeout(function(){
+			$('#level_view').addClass('animated bounceOutLeft');
+			setTimeout(function(){
+				$('#music_view').removeClass();
+		    	$('#music_view').show().addClass('animated bounceInRight');
+		    	step = 3;
+	    	},30);
+		},250);
+
+}
+
+
+function transition_back_02(){
+	$('#music_view').removeClass();
+	
+		setTimeout(function(){
+			$('#music_view').addClass('animated bounceOutRight');
+			setTimeout(function(){
+				$('#level_view').removeClass();
+		    	$('#level_view').addClass('animated bounceInLeft');
+		    	step = 2;
+	    	},100);
+		},250);
+}
+
+
+
+function interaction_02(direction){  // 
+
+	if(direction){
+		if(prev_lv == 4){
+			$('#lv_3').removeClass("active_lv");
+			$('#lv_3').addClass("n_active_lv");
+			$('#lv_0').addClass("active_lv");
+			prev_lv = 0;
+			cur_lv = 0;
+		}else{
+			$('#lv_'+ prev_lv).removeClass("active_lv");
+			$('#lv_'+ prev_lv).addClass("n_active_lv");
+			$('#lv_'+ (prev_lv+1)).addClass("active_lv");
+			cur_lv = prev_lv+1;
+			prev_lv++;
+		}
+	}else if(!direction){
+		if(prev_lv == 0){
+			$('#lv_0').removeClass("active_lv");
+			$('#lv_0').addClass("n_active_lv");
+			$('#lv_3').addClass("active_lv");
+			prev_lv = 3;
+			cur_lv = prev_lv;
+		}else{
+			$('#lv_'+ prev_lv).removeClass("active_lv");
+			$('#lv_'+ prev_lv).addClass("n_active_lv");
+			$('#lv_'+ (prev_lv-1)).addClass("active_lv");
+			cur_lv = prev_lv-1;
+			prev_lv--;
+		}
+	}
+
+
+}
+
+
+/********************************************************
+		STEP 3 :: MUSIC SELECTION - INTERACTION
+********************************************************/
+function transition_03(){  
+/*****************************************BirthdayGirl
+	$('#music_view').removeClass();
+	
+		setTimeout(function(){
+			$('#music_view').addClass('animated fadeOut');
+			setTimeout(function(){
+				$('#game_view').removeClass();
+		    	$('#game_view').show().addClass('animated fadeIn');
+		    	step = 4;
+		    	$('.back_music').html("<embed name=\"back_music0\" src=\"sounds/BGM/Easy_DJsProject-BirthdayGirl.wav\" loop=\"false\" hidden=\"true\" autostart=\"true\">");
+		    	game_1(3000);
+	    	},30);
+		},250);
+********************************************************/
+
+
+$('#music_view').removeClass();
+	
+		setTimeout(function(){
+			$('#music_view').addClass('animated fadeOut');
+			setTimeout(function(){
+				$('#game_view').removeClass();
+		    	$('#game_view').show().addClass('animated fadeIn');
+		    	step = 4;
+		    	$('.back_music').html("<embed name=\"back_music0\" src=\"sounds/BGM/Easy_DJsProject-BirthdayGirl.wav\" loop=\"false\" hidden=\"true\" autostart=\"true\">");
+		    	game_1(3000);
+	    	},30);
+		},250);
+}
+
+
+function interaction_03(level){
+
+
+	if (cur_lv == 0){
+		stage = 'e';
+	}else if(cur_lv ==1){
+		stage = 'h';
+	}else if(cur_lv ==2){
+		stage = 'c';
+	}else if(cur_lv ==3){
+		stage = 'n';
+	}
+
+		if(stage == 'n' || stage == 'h'){
+
+			if(m_number ==1){
+				$('#'+stage+'_01').animate({
+					'top':'160%',
+					'z-index':'1',
+					'zoom':'83%'
+				},'slow');
+				$('#'+stage+'_02').animate({
+					'top':'50%',
+					'z-index':'3',
+					'zoom':'100%'
+				},'slow');
+				$('#'+stage+'_03').animate({
+					'top':'168%',
+					'z-index':'2',
+					'zoom':'91%'
+				},'slow');
+
+				m_number = 2;
+
+			}else if(m_number ==2){
+				$('#'+stage+'_02').animate({
+					'top':'160%',
+					'z-index':'1',
+					'zoom':'83%'
+				},'slow');
+				$('#'+stage+'_03').animate({
+					'top':'50%',
+					'z-index':'3',
+					'zoom':'100%'
+				},'slow');
+				$('#'+stage+'_01').animate({
+					'top':'168%',
+					'z-index':'2',
+					'zoom':'91%'
+				},'slow');
+
+				m_number = 3;
+			}else if(m_number ==3){
+				$('#'+stage+'_03').animate({
+					'top':'160%',
+					'z-index':'1',
+					'zoom':'82%'
+				},'slow');
+				$('#'+stage+'_01').animate({
+					'top':'50%',
+					'z-index':'3',
+					'zoom':'100%'
+				},'slow');
+				$('#'+stage+'_02').animate({
+					'top':'168%',
+					'z-index':'2',
+					'zoom':'90%'
+				},'slow');
+
+				m_number = 1;
+			}
+			
+
+		}else if(stage =='c'){
+
+			if(m_number ==1){
+				$('#'+stage+'_01').animate({
+					'top':'168%',
+					'z-index':'1',
+					'zoom':'91%',
+				},'slow');
+				$('#'+stage+'_02').animate({
+					'top':'50%',
+					'z-index':'2',
+					'zoom':'100%',
+				},'slow');
+
+				m_number = 2;
+			}else if(m_number ==2){
+				$('#'+stage+'_02').animate({
+					'top':'168%',
+					'z-index':'1',
+					'zoom':'90%'
+				});
+				$('#'+stage+'_01').animate({
+					'top':'50%',
+					'z-index':'2',
+					'zoom':'100%'
+				},'slow');
+
+				m_number = 1;
+			}
+
+		}
+
+}
+
+function interaction_04(C_B, data){
+
+
+}
+
+if(step ==4){
+/********************************************************
+		STEP 3 :: GAME - INTERACTION & GRAPHIC
+********************************************************/
+
+game_1(3000);
+
+
+	// if(time == 0)step = 5;
+}else if(step ==5){
+/********************************************************
+		STEP 3 :: GRADE - INTERACTION & INFO
+********************************************************/
+	step =1;
+}
+
+function random_creator(){
+	var select = (int)(Math.random()*10);
+	if(select == 0){
+		select += 1;
+	}
+
+	return select;
+}
+
+/********************************************************
+			GENERAL INTERACTION ELEMENTS
+********************************************************/
+
+function game_1(start_time){
+
+	$('.back_music').html("<embed name=\"back_music0\" src=\"sounds/BGM/Hard_VideoKids-DoTheRap.wav\" loop=\"false\" hidden=\"true\" autostart=\"true\">");
+	dotherap();
+
+}
+
+function dotherap(){
+
+	beat_point(1,0,3000,3000);
+	beat_point(2,2,3500,3000);
+	beat_point(2,5,4000,3000);
+	beat_point(3,0,5000,3000);
+	beat_point(4,5,5500,3000);
+	beat_point(4,8,6000,3000);
+	beat_point(1,1,7000,3000);
+	beat_point(1,7,7500,3000);
+	beat_point(2,3,8000,3000);
+	beat_point(2,8,8500,3000);
+	beat_point(3,3,9000,3000);
+	beat_point(4,0,9500,3000);
+	beat_point(4,5,10000,3000);
+	beat_point(2,5,10500,3000);
+	beat_point(3,0,11000,3000);
+	beat_point(1,3,11500,3000);
+	beat_point(2,6,12300,3000);
+	beat_point(3,5,13000,3000);
+	beat_point(4,2,13800,3000);
+	beat_point(3,2,14600,3000);
+	beat_point(2,9,15800,3000);
+	beat_point(1,0,16600,3000);
+	beat_point(1,4,17800,3000);
+	beat_point(2,6,18600,3000);
+	beat_point(3,7,19500,3000);
+	beat_point(3,8,19800,3000);
+	beat_point(3,9,20100,3000);
+	beat_point(3,3,20400,3000);
+	beat_point(3,4,20700,3000);
+	beat_point(4,5,21700,3000);
+	beat_point(4,6,22000,3000);
+	beat_point(4,7,22300,3000);
+	beat_point(1,0,23900,3000);
+	beat_point(1,1,24200,3000);
+	beat_point(1,2,24500,3000);
+	beat_point(1,3,24800,3000);
+	beat_point(1,4,25100,3000);
+	beat_point(2,5,26100,3000);
+	beat_point(2,6,26400,3000);
+	beat_point(2,7,26700,3000);
+	beat_point(4,0,27500,3000);
+	beat_point(3,7,28500,3000);
+	beat_point(3,8,29000,3000);
+	beat_point(1,5,29800,3000);
+	beat_point(2,0,30300,3000);
+	beat_point(2,2,30800,3000);
+	beat_point(3,5,31500,3000);
+	beat_point(2,3,32000,3000);
+	beat_point(4,5,32500,3000);
+	beat_point(4,8,33000,3000);
+	beat_point(1,0,33800,3000);
+	beat_point(1,1,34300,3000);
+	beat_point(2,5,35000,3000);
+	beat_point(3,3,35500,3000);
+	beat_point(4,6,36300,3000);
+	beat_point(4,7,36600,3000);
+	beat_point(2,0,38000,3000);
+	beat_point(2,1,38300,3000);
+	beat_point(2,7,40500,3000);
+	beat_point(1,8,41000,3000);
+	beat_point(3,8,42000,3000);
+	beat_point(3,2,42500,3000);
+	beat_point(2,5,43500,3000);
+	beat_point(2,9,44000,3000);
+	beat_point(4,0,45000,3000);
+	beat_point(4,2,45500,3000);
+	beat_point(4,3,46000,3000);
+	beat_point(1,7,47000,3000);
+	beat_point(2,8,47500,3000);
+	beat_point(2,6,48000,3000);
+	beat_point(4,9,49000,3000);
+	beat_point(3,9,49500,3000);
+	beat_point(2,0,50000,3000);
+	beat_point(1,0,50500,3000);
+	beat_point(4,0,53300,3000);
+	beat_point(3,0,53800,3000);
+	beat_point(2,9,54300,3000);
+	beat_point(1,9,54800,3000);
+	beat_point(1,5,57600,3000);
+	beat_point(2,5,58100,3000);
+	beat_point(3,3,58600,3000);
+	beat_point(4,2,59100,3000);
+	beat_point(4,3,61900,3000);
+	beat_point(3,4,62400,3000);
+	beat_point(2,6,62900,3000);
+	beat_point(1,6,63400,3000);
+	beat_point(2,0,64000,3000);
+	beat_point(2,2,64300,3000);
+	beat_point(2,5,64600,3000);
+	beat_point(2,8,64900,3000);
+	beat_point(3,0,65500,3000);
+
+
+
+
+
+}
+
+
+
+/****************************************Birthday_girl
+
+function birthday_girl(){
+
+	// setTimeout(function(){
+
+	// 	$('#1_n1').animate({
+	// 		'top':'110%'
+	// 	}, 3000);
+
+	// },1000);
+
+	// setTimeout(function(){
+
+	// 	$('#1_n1').css({
+	// 		'top':'-10%'
+	// 	});
+
+	// },4100);
+
+
+	// setTimeout(function(){
+
+	// 	$('#1_n1').animate({
+	// 		'top':'-10%'
+	// 	});
+		
+	// },1100);
+
+
+	beat_point(1,0,400,4000);
+	beat_point(2,5,4000,4000);
+	beat_point(3,7,5800,4000);
+	beat_point(4,2,6700,4000);
+	beat_point(4,8,7200,4000);
+	beat_point(4,5,7700,4000);
+	beat_point(3,0,9000,4000);
+	beat_point(3,1,9500,4000);
+	beat_point(2,5,11000,4000);
+	beat_point(2,6,11500,4000);
+	beat_point(1,0,12700,4000);
+	beat_point(1,1,13700,4000);
+	beat_point(2,8,16000,4000);
+	beat_point(2,9,16800,4000);
+	beat_point(3,3,18000,4000);
+	beat_point(3,4,19000,4000);
+	beat_point(4,5,20000,4000);
+	beat_point(4,6,21000,4000);
+	beat_point(2,2,22000,4000);
+	beat_point(2,3,23000,4000);
+	beat_point(1,0,24200,4000);
+	beat_point(1,1,25200,4000);
+	beat_point(3,5,26400,4000);
+	beat_point(3,6,27400,4000);
+	beat_point(2,0,28500,4000);
+	beat_point(2,4,29000,4000);
+	beat_point(2,1,29500,4000);
+	beat_point(2,2,30000,4000);
+	beat_point(2,5,30500,4000);
+	beat_point(2,8,31000,4000);
+	beat_point(2,6,31500,4000);
+	beat_point(2,9,32000,4000);
+	beat_point(3,0,32500,4000);
+	beat_point(3,3,33000,4000);
+	beat_point(3,1,33500,4000);
+	beat_point(3,4,34000,4000);
+	beat_point(3,5,34500,4000);
+	beat_point(3,7,35000,4000);
+	beat_point(3,6,35500,4000);
+	beat_point(3,8,36000,4000);
+	beat_point(1,3,37000,4000);
+	beat_point(1,4,38000,4000);
+	beat_point(4,5,39000,4000);
+	beat_point(4,6,40000,4000);
+	beat_point(2,2,41000,4000);
+	beat_point(2,3,42000,4000);
+	beat_point(1,0,43200,4000);
+	beat_point(1,1,44200,4000);
+	beat_point(3,5,45400,4000);
+	beat_point(3,7,46400,4000);
+	beat_point(1,5,47400,4000);
+	beat_point(1,9,48400,4000);
+	beat_point(4,8,49400,4000);
+	beat_point(4,0,50400,4000);
+	beat_point(2,5,51400,4000);
+	beat_point(2,9,52400,4000);
+	// beat_point(1,3,53600,4000);
+	// beat_point(1,4,54600,4000);
+	// beat_point(3,5,55800,4000);
+	// beat_point(3,6,56800,4000);
+
+
+
+}
+
+****************************************************/
+
+function beat_point(slot, number, start_time, speed){
+
+
+	setTimeout(function(){
+
+		$('#'+slot+'_n'+number).animate({
+			'top':'110%'
+		}, speed,"linear");
+
+	},start_time);
+
+	setTimeout(function(){
+
+		$('#'+slot+'_n'+number).css({
+			'top':'-10%'
+		});
+		
+	},start_time + speed + 500);
+
+
+}
+
+
+
+
+
+}); //document ready/
+
+</script>
+
+</head>
+<body>
+
+	<!-- 1st ( START ) VIEW -->
+	<section id="logo_view" style="display:none">
+		<img id="interaction_info" src="img/Interaction_info.png">
+		<div class="logo_container">
+			<img id="logo" src="img/TITLE/TITLE.png">
+			<img id="enter" src="img/TITLE/ENTER.png">
+		</div>
+
+		<img id="note_1" class="note" src="img/NOTE_IMG/01_red_219_153.png">
+		<img id="note_2" class="note" src="img/NOTE_IMG/02_blue_1115_538.png">
+		<img id="note_3" class="note" src="img/NOTE_IMG/03_yellow_634_942.png">
+		<img id="note_4" class="note" src="img/NOTE_IMG/04_red_1196_1407.png">
+		<img id="note_5" class="note" src="img/NOTE_IMG/05_violet_303_1792.png">
+		<img id="note_6" class="note" src="img/NOTE_IMG/06_green_850_2157.png">
+
+		<img id="note_7" class="note" src="img/NOTE_IMG/music_white.png">
+		<img id="note_8" class="note" src="img/NOTE_IMG/music_violet.png">
+		<img id="note_9" class="note" src="img/NOTE_IMG/music_green.png">
+		<img id="note_10" class="note" src="img/NOTE_IMG/music_yellow.png">
+		<img id="note_11" class="note" src="img/NOTE_IMG/music_blue.png">
+		<img id="note_12" class="note" src="img/NOTE_IMG/music_white.png">
+		<img id="note_13" class="note" src="img/NOTE_IMG/music_red.png">
+
+	</section>
+
+	<!-- 2nd ( HOW TO PLAY ) VIEW -->
+	<section id="loading_view" style="display:none">
+
+		<img id="note_r" class="loading_note" src="img/NOTE_IMG/01_red_219_153.png">
+		<img id="note_b" class="loading_note" src="img/NOTE_IMG/02_blue_1115_538.png">
+		<img id="note_y" class="loading_note" src="img/NOTE_IMG/03_yellow_634_942.png">
+		<img id="note_g" class="loading_note" src="img/NOTE_IMG/06_green_850_2157.png">
+
+		<div id="lp">
+			<div id="lp_1" class="loading_lp"><div id="lp_inner_1" class="loading_lp_inner"></div></div>
+			<div id="lp_2" class="loading_lp"><div id="lp_inner_2" class="loading_lp_inner"></div></div>
+			<div id="lp_3" class="loading_lp"><div id="lp_inner_3" class="loading_lp_inner"></div></div>
+			<div id="lp_4" class="loading_lp"><div id="lp_inner_4" class="loading_lp_inner"></div></div>
+			<div id="lp_5" class="loading_lp"></div>
+		</div>
+
+		<div class="dim"></div>
+
+
+		<div id="instruction" class="instruction">Turn It To START !</div>
+
+
+	</section>
+
+	<!-- 3rd ( LEVEL SELECTION ) VIEW -->
+	<section id="level_view" style="display:none">
+		<img class="level_background_img" src="img/LEVEL/DJ80_1920_1200_LEVEL_bg.jpg">
+		<img id="interaction_info" src="img/Interaction_info.png">
+
+		<div class="level_selector">
+			<img id="lv_0" class="active_lv" src="img/LEVEL/Easy_big.png">
+			<img id="lv_1" class="n_active_lv" src="img/LEVEL/Hard_big.png">
+			<img id="lv_2" class="n_active_lv" src="img/LEVEL/Crazy_big.png">
+			<img id="lv_3" class="n_active_lv" src="img/LEVEL/Normal_big.png">
+		</div>
+		
+
+	</section>
+
+	<!-- 3rd ( MUSIC SELECTION ) VIEW -->
+	<section id="music_view" style="display:none">
+		<img id="interaction_info" src="img/Interaction_info.png">
+		<img class="level_background_img" src="img/MUSIC/Select Music_bg.jpg">
+
+		<div class="music_selector">
+
+			<div class="m_easy" style="display:none">
+				<div class="show_lv"><img class="music_level" src="img/MUSIC/level/Easy.png"></div>
+
+				<img id="e_01" class="music_img" src="img/MUSIC/Easy_song_01.png">
+				<embed id="pre_e_01" src="sounds/BGM/Pre_Easy_DJsProject-BirthdayGirl.wav" autostart="true" hidden="true" loop="true" width="2" height="0">
+					</embed>
+			</div>
+
+			<div class="m_normal" style="display:none">
+				<div class="show_lv"><img class="music_level" src="img/MUSIC/level/Normal.png"></div>
+
+				<img id="n_01" class="music_img" src="img/MUSIC/Normal_song_01.png">
+				<embed id="pre_n_01" src="sounds/BGM/Pre_Normal_Sabrina-Boys.wav" autostart="true" hidden="true" loop="true" width="2" height="0">
+					</embed>
+
+				<img id="n_02" class="music_img" src="img/MUSIC/Normal_song_02.png">
+				<embed id="pre_n_02" src="sounds/BGM/Pre_Normal_Kaoma-Lambada.wav" autostart="true" hidden="true" loop="true" width="2" height="0">
+					</embed>
+
+				<img id="n_03" class="music_img" src="img/MUSIC/Normal_song_03.png">
+				<embed id="pre_n_03" src="sounds/BGM/Pre_Normal_DonnaSummer-HotStuff.wav" autostart="true" hidden="true" loop="true" width="2" height="0">
+					</embed>
+			</div>
+
+			<div class="m_hard" style="display:none">
+				<div class="show_lv"><img class="music_level" src="img/MUSIC/level/Hard.png"></div>
+
+				<img id="h_01" class="music_img" src="img/MUSIC/Hard_song_01.png">
+				<embed id="pre_h_01" src="sounds/BGM/Pre_Hard_VideoKids-DoTheRap.wav" autostart="true" hidden="true" loop="true" width="2" height="0">
+					</embed>
+
+				<img id="h_02" class="music_img" src="img/MUSIC/Hard_song_02.png">
+				<embed id="pre_h_02" src="sounds/BGM/Pre_Hard_MikeMareen-AgentOfLiberty.wav" autostart="true" hidden="true" loop="true" width="2" height="0">
+					</embed>
+
+				<img id="h_03" class="music_img" src="img/MUSIC/Hard_song_03.png">
+				<embed id="pre_h_03" src="sounds/BGM/Pre_Hard_MichaelJackson-Thriller.wav" autostart="true" hidden="true" loop="true" width="2" height="0">
+					</embed>
+
+			</div>
+
+			<div class="m_crazy"  style="display:none">
+				<div class="show_lv"><img class="music_level" src="img/MUSIC/level/Crazy.png"></div>
+
+				<img id="c_01" class="music_img" src="img/MUSIC/Crazy_song_01.png">
+				<embed id="pre_c_01" src="sounds/BGM/Pre_Crazy_DeadOrAlive-YouSpinMe Round.wav" autostart="true" hidden="true" loop="true" width="2" height="0">
+					</embed>
+
+				<img id="c_02" class="music_img" src="img/MUSIC/Crazy_song_02.png">
+				<embed id="pre_c_02" src="sounds/BGM/Pre_Crazy_Eurythmics-SweetDreams.wav" autostart="true" hidden="true" loop="true" width="2" height="0">
+					</embed>
+
+			</div>
+
+			<div class="dim_box"></div>
+			<!-- <img class="music_box" src="img/MUSIC/Record_folder.png"> -->
+		</div>
+		
+
+	</section>
+
+	<!-- 4th ( GAME ) VIEW -->
+	<section id="game_view">
+		<img id="game_score_structure" src="img/GAME/DJ80_1920_1200_GAME_element.png">
+
+		<p class="msg"></p>
+
+		<div class="back_music"></div>
+
+		<div class="game_structure">
+			<div class="score_container">
+				<p class="score_text">SCORE</p>
+				<p class="t_score">0</p>
+			</div>
+			<!-- <div class="rank_container">
+				<p class="rank_text">RANKING BEST</p>
+				<p class="ranked_score">1234567890</p>
+			</div> -->
+
+			<div class="play_info">
+				<img id="play_level_0" class="music_level" src="img/MUSIC/level/Easy.png" style="display:none">
+				<img id="play_level_3" class="music_level" src="img/MUSIC/level/Normal.png" style="display:none">
+				<img id="play_level_1" class="music_level" src="img/MUSIC/level/Hard.png" style="display:none">
+				<img id="play_level_2" class="music_level" src="img/MUSIC/level/Crazy.png" style="display:none">
+				<div class="title_artist">
+				<p class="title">SWEET DREAMS</p>
+				<p class="artist">EURYTHMICS</p>
+				</div>
+			</div>
+<!-- 
+			<div class="time_combo_info">
+				<div class="time_container">
+					<p class="time_text">TIME</p>
+					<p class="time">60</p>
+				</div>
+				<div class="combo_container">
+					<p class="combo_text">COMBO</p>
+					<div class="combo">
+						<img id="combo_01" class="combo_stage" src="img/GAME/COMBO/COMBO_01.png" style="display:none">
+						<img id="combo_02" class="combo_stage" src="img/GAME/COMBO/COMBO_02.png" style="display:none">
+						<img id="combo_03" class="combo_stage" src="img/GAME/COMBO/COMBO_03.png" style="display:none">
+						<img id="combo_04" class="combo_stage" src="img/GAME/COMBO/COMBO_04.png" style="display:none">
+						<img id="combo_05" class="combo_stage" src="img/GAME/COMBO/COMBO_05.png" style="display:none">
+						<img id="combo_06" class="combo_stage" src="img/GAME/COMBO/COMBO_06.png" style="display:none">
+					</div>
+					<div class="bonus">
+						<img id="bonus_01" class="bonus_stage" src="img/GAME/COMBO/BONUS_1000.png" style="display:none">
+						<img id="bonus_02" class="bonus_stage" src="img/GAME/COMBO/BONUS_2000.png" style="display:none">
+						<img id="bonus_03" class="bonus_stage" src="img/GAME/COMBO/BONUS_3000.png" style="display:none">
+						<img id="bonus_04" class="bonus_stage" src="img/GAME/COMBO/BONUS_4000.png" style="display:none">
+						<img id="bonus_05" class="bonus_stage" src="img/GAME/COMBO/BONUS_5000.png" style="display:none">
+					</div>
+				</div>
+			</div>  -->
+
+			<div class="action" style="display:none">
+				<div class="combo_action">
+					<img id="combo_img" src="img/GAME/COMBO/COMBO_text.png" style="">
+					<div class="number_combo"><p class="count_combo">99</p></div>
+				</div>
+				<div class="action_type"><p class="p_type">PERFECT</p></div>
+			</div>
+		</div>
+
+		<!-- real game interactive area. balls fall down and shoot by turuing turntable -->
+		<div class="game_area">
+			<div id ="active_slot"></div>
+			<div id="slot_01" class="slot">
+				<img id="n_optional" class="game_note" src="img/GAME/GAME_music/red_94.png">
+				<div id="slotBox_back_01" class="slot_box_background"></div>
+				<div id="slotBox_01" class="slot_color_box"><img class="game_box_note" src="img/NOTE_IMG/music_white_inner.png"></div>
+
+				<img id="1_n0" class="game_note" src="img/GAME/GAME_music/red_94.png">
+				<img id="1_n1" class="game_note" src="img/GAME/GAME_music/red_94.png">
+				<img id="1_n2" class="game_note" src="img/GAME/GAME_music/red_94.png">
+
+				<img id="1_n3" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+				<img id="1_n4" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+
+				<img id="1_n5" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+				<img id="1_n6" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+
+				<img id="1_n7" class="game_note" src="img/GAME/GAME_music/green_94.png">
+				<img id="1_n8" class="game_note" src="img/GAME/GAME_music/green_94.png">
+				<img id="1_n9" class="game_note" src="img/GAME/GAME_music/green_94.png">
+
+
+				<!-- position setting to over the game scene. and wait for its order/time -->
+
+
+
+			</div>
+			<div id="slot_02" class="slot">
+				<div id="slotBox_back_02" class="slot_box_background"></div>
+				<div id="slotBox_02" class="slot_color_box"><img class="game_box_note" src="img/NOTE_IMG/music_white_inner.png"></div>
+
+				<img id="2_n0" class="game_note" src="img/GAME/GAME_music/red_94.png">
+				<img id="2_n1" class="game_note" src="img/GAME/GAME_music/red_94.png">
+				<img id="2_n2" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+
+				<img id="2_n3" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+				<img id="2_n4" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+
+				<img id="2_n5" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+				<img id="2_n6" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+
+				<img id="2_n7" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+				<img id="2_n8" class="game_note" src="img/GAME/GAME_music/green_94.png">
+				<img id="2_n9" class="game_note" src="img/GAME/GAME_music/green_94.png">
+
+			</div>
+			<div id="slot_03" class="slot">
+				<div id="slotBox_back_03" class="slot_box_background"></div>
+				<div id="slotBox_03" class="slot_color_box"><img class="game_box_note" src="img/NOTE_IMG/music_white_inner.png"></div>
+
+				<img id="3_n0" class="game_note" src="img/GAME/GAME_music/red_94.png">
+				<img id="3_n1" class="game_note" src="img/GAME/GAME_music/red_94.png">
+				<img id="3_n2" class="game_note" src="img/GAME/GAME_music/red_94.png">
+
+				<img id="3_n3" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+				<img id="3_n4" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+
+				<img id="3_n5" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+				<img id="3_n6" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+
+				<img id="3_n7" class="game_note" src="img/GAME/GAME_music/green_94.png">
+				<img id="3_n8" class="game_note" src="img/GAME/GAME_music/green_94.png">
+				<img id="3_n9" class="game_note" src="img/GAME/GAME_music/green_94.png">
+
+			</div>
+			<div id="slot_04" class="slot">
+				<div id="slotBox_back_04" class="slot_box_background"></div>
+				<div id="slotBox_04" class="slot_color_box"><img class="game_box_note" src="img/NOTE_IMG/music_white_inner.png"></div>
+
+				<img id="4_n0" class="game_note" src="img/GAME/GAME_music/red_94.png">
+				<img id="4_n1" class="game_note" src="img/GAME/GAME_music/red_94.png">
+				<img id="4_n2" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+
+				<img id="4_n3" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+				<img id="4_n4" class="game_note" src="img/GAME/GAME_music/blue_94.png">
+
+				<img id="4_n5" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+				<img id="4_n6" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+
+				<img id="4_n7" class="game_note" src="img/GAME/GAME_music/yellow_94.png">
+				<img id="4_n8" class="game_note" src="img/GAME/GAME_music/green_94.png">
+				<img id="4_n9" class="game_note" src="img/GAME/GAME_music/green_94.png">
+
+			</div>
+		</div>
+
+		<canvas id="countingDownCanvas"></canvas>
+		<canvas id="awesomeCanvas"></canvas>
+
+	</section>
+
+	<!-- 5th ( RESULT ) VIEW -->
+	<section id="result_view" style="display:none">
+			<img class="fail" src="img/GAME/SCORE/FAIL.png" style="display:none">
+			<div class="pass" style="display:none">
+	 			<img class="score_frame" src="img/GAME/SCORE/SCORE_board.png">
+	 			<p class="result_score">1234567890</p>
+	 			<img class="grade" src="img/GAME/SCORE/MASTER.png">
+ 			</div>
+	</section>
+
+	<!-- 6th ( TRY AGAIN ) VIEW -->
+	<section id="try_view" style="display:none">
+			<img class="try_again" src="img/PLAYAGAIN/PLAY_AGAIN.png">
+			<div class="yes_container">
+	 			<img class="yes" src="img/PLAYAGAIN/YES.png">
+	 			<img class="yes_bt" src="img/PLAYAGAIN/BT_red.png">
+ 			</div>
+ 			<div class="no_container">
+	 			<img class="no" src="img/PLAYAGAIN/NO.png">
+	 			<img class="no_bt" src="img/PLAYAGAIN/BT_blue.png">
+ 			</div>
+	</section>
+
+
+</body>
+</html>
+
+
+<!--  
+
+<script src="http://localhost:9001/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="js/interaction.js"></script>
+
+-->
